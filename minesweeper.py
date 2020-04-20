@@ -289,7 +289,7 @@ def run(field: List[List[int]],
         print(stack)
         print()
       if show_command:
-        print(f'exec "{command_names[field[com_x][com_y] + 10 if current_revealed[com_x][com_y] else 0]}" at ({com_y}, {com_x})')
+        print(f'exec "{command_names[field[com_x][com_y] + (10 if current_revealed[com_x][com_y] else 0)]}" at ({com_y}, {com_x})')
         print()
 
     exexute_command(com_x, com_y)
