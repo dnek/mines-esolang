@@ -107,6 +107,28 @@ def run(field: List[List[int]],
     show_field: bool = args.field
     show_stack: bool = args.stack
     show_command: bool = args.command
+    command_limit: int = args.limit if args.limit else -1
+    command_names = [
+      '0: push',
+      '1: not',
+      '2: in(n)',
+      '3: in(c)',
+      '4: out(n)',
+      '5: out(c)',
+      '6: pick',
+      '7: insert',
+      '8: skip',
+      '9: reset',
+      '0r: dup',
+      '1r: pop',
+      '2r: add',
+      '3r: sub',
+      '4r: mul',
+      '5r: div',
+      '6r: mod',
+      '7r: greater',
+      '8r: exec',
+    ]
 
   height = len(field)
   width = len(field[0])
@@ -237,6 +259,12 @@ def run(field: List[List[int]],
           command_pointer = (command_pointer + stack_pop()) % command_length
 
   while ever_rest_cells > 0 and ever_rest_mines > 0:
+    if debug_mode:
+      if command_limit == 0:
+        print('Command limit exceeded.')
+        break
+      elif command_limit > 0:
+        command_limit -= 1
     if command_to_exec != None:
       com_x, com_y = command_to_exec
       command_to_exec = None
@@ -260,7 +288,7 @@ def run(field: List[List[int]],
         print(stack)
         print()
       if show_command:
-        print(f'exec command-{field[com_x][com_y]}{"r" if current_revealed[com_x][com_y] else ""} at ({com_y}, {com_x})')
+        print(f'exec "{command_names[field[com_x][com_y] + 10 if current_revealed[com_x][com_y] else 0]}" at ({com_y}, {com_x})')
         print()
 
     exexute_command(com_x, com_y)
@@ -295,6 +323,7 @@ if __name__ == "__main__":
   arg_parser.add_argument('-f', '--field', help="Show field each phase (require debug mode)", action="store_true")
   arg_parser.add_argument('-s', '--stack', help="Show stack each phase (require debug mode)", action="store_true")
   arg_parser.add_argument('-c', '--command', help="Show command each phase (require debug mode)", action="store_true")
+  arg_parser.add_argument('-l', '--limit', help="Limit command execution count (require debug mode)", type=int)
   arg_parser.add_argument('program_path', help='Program path', type=str)
   args = arg_parser.parse_args()
   main()
