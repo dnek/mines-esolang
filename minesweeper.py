@@ -42,6 +42,7 @@ def parse_code(filename: str):
   def construct_open_set():
     nonlocal open_set_list, open_set_address
     open_set_address = [[-1] * width for _ in range(height)]
+    open_set_list_append = open_set_list.append
     for x in range(height):
       for y in range(width):
         if open_set_address[x][y] == -1 and field[x][y] == 0:
@@ -52,8 +53,9 @@ def parse_code(filename: str):
           search_que = deque([x_y])
           open_set_add = open_set.add
           search_que_append = search_que.append
+          search_que_pop = search_que.pop
           while(len(search_que)):
-            o_x, o_y = search_que.pop()
+            o_x, o_y = search_que_pop()
             for i in range(max(0, o_x - 1), min(height - 1, o_x + 1) + 1):
               for j in range(max(0, o_y - 1), min(width - 1, o_y + 1) + 1):
                 if open_set_address[i][j] == -1:
@@ -62,7 +64,7 @@ def parse_code(filename: str):
                   if field[x][y]:
                     open_set_address[i][j] = open_set_list_index
                     search_que_append(i_j)
-          open_set_list.append(open_set)
+          open_set_list_append(open_set)
 
   def parse_command(line: str) -> (int, int):
     if len(line) == 0:
@@ -108,6 +110,7 @@ def run(field: List[List[int]],
 
   height = len(field)
   width = len(field[0])
+  command_length = len(commands)
 
 
   current_revealed = [[False] * width for _ in range(height)]
@@ -231,11 +234,11 @@ def run(field: List[List[int]],
               stack_insert(-p - 1, p1)
       elif current_command == 8: #command-8 (skip p commands)
         if len(stack) > 0:
-          command_pointer = (command_pointer + stack_pop()) % len(commands)
+          command_pointer = (command_pointer + stack_pop()) % command_length
 
   while ever_rest_cells > 0 and ever_rest_mines > 0:
     if command_to_exec == None:
-      command_pointer = (command_pointer + 1) % len(commands)
+      command_pointer = (command_pointer + 1) % command_length
       com_x, com_y = commands[command_pointer]
     else:
       com_x, com_y = command_to_exec
