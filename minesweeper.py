@@ -128,7 +128,7 @@ def run(field: List[List[int]],
       '4r: mul',
       '5r: div',
       '6r: mod',
-      '7r: greater',
+      '7r: positive',
       '8r: exec',
     ]
 
@@ -186,10 +186,9 @@ def run(field: List[List[int]],
         if len(stack) > 1 and stack[-1] != 0:
           p0, p1 = stack_pop(), stack_pop()
           stack_append(p1 % p0)
-      elif current_command == 7: #command-7r (p1 > p0 ? 1 : 0)
-        if len(stack) > 1:
-          p0, p1 = stack_pop(), stack_pop()
-          stack_append(1 if p1 > p0 else 0)
+      elif current_command == 7: #command-7r (p > 0 ? 1 : 0)
+        if len(stack) > 0:
+          stack_append(1 if stack_pop() > 0 else 0)
       elif current_command == 8: #command-8r (exec open[p1][p0])
         if len(stack) > 1:
           command_to_exec = (stack_pop() % len(height), stack_pop() % len(height)) # inverted.
