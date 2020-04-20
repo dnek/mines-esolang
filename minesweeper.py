@@ -54,15 +54,15 @@ def parse_code(filename: str):
           open_set_add = open_set.add
           search_que_append = search_que.append
           search_que_pop = search_que.pop
-          while(len(search_que)):
+          while(len(search_que) > 0):
             o_x, o_y = search_que_pop()
             for i in range(max(0, o_x - 1), min(height - 1, o_x + 1) + 1):
               for j in range(max(0, o_y - 1), min(width - 1, o_y + 1) + 1):
                 if open_set_address[i][j] == -1:
                   i_j = (i, j)
                   open_set_add(i_j)
-                  if field[x][y]:
-                    open_set_address[i][j] = open_set_list_index
+                  open_set_address[i][j] = open_set_list_index
+                  if field[i][j] == 0:
                     search_que_append(i_j)
           open_set_list_append(open_set)
 
