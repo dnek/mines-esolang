@@ -273,8 +273,9 @@ def run(field: List[List[int]],
       command_adress = commands[command_pointer]
       if command_adress == None:
         if debug_mode:
-          print('nop')
-          print()
+          if show_command:
+            print('nop')
+            print()
         continue
       com_x, com_y = command_adress
 
