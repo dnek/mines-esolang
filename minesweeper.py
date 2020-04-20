@@ -20,10 +20,10 @@ def parse_code(filename: str):
   mines = 0
   open_set_list = [] #[set]
   open_set_address = [] #[[int]]
-  commands = [] #[(int, int)]
+  commands = [] #[(int, int, bool)]
 
   row_re = re.compile(r'[.*]{{{width}}}'.format(width=width))
-  command_re = re.compile(r'(-?[0-9]+),(-?[0-9]+)')
+  command_re = re.compile(r'(0|-?[1-9][0-9]*)([,;])(0|-?[1-9][0-9]*)')
 
   def construct_field():
     nonlocal field
@@ -67,14 +67,14 @@ def parse_code(filename: str):
                     search_que_append(i_j)
           open_set_list_append(open_set)
 
-  def parse_command(line: str) -> (int, int):
+  def parse_command(line: str) -> (int, int, bool):
     if len(line) == 0:
       return None
     else:
       command_match = re.fullmatch(command_re, line)
       if not command_match:
         raise NameError(f"Command '{line}' is inconsistent.")
-      return (int(command_match[2]) % height, int(command_match[1]) % width) # inverted.
+      return (int(command_match[3]) % height, int(command_match[1]) % width, command_match[2] == ';') # inverted.
 
   parsing_field = True
   is_mine_append = is_mine.append
@@ -101,7 +101,7 @@ def run(field: List[List[int]],
     mines: int,
     open_set_list: List[Set[Tuple[int, int]]],
     open_set_address: List[List[int]],
-    commands: List[Tuple[int, int]]):
+    commands: List[Tuple[int, int, bool]]):
   
   debug_mode: bool = args.debug
   if debug_mode:
@@ -288,7 +288,7 @@ def run(field: List[List[int]],
             print('nop')
             print()
         continue
-      com_x, com_y = command_adress
+      com_x, com_y, com_right = command_adress
 
     if debug_mode:
       if show_field:
