@@ -236,7 +236,9 @@ def run(field: List[List[int]],
           print(stack_pop(), end='', flush=True)
       elif current_command == 5: #command-5 (output top as char)
         if len(stack) > 0:
-          print(chr(stack_pop()), end='', flush=True)
+          p = stack[-1]
+          if p > -1 and p < 0x110000:
+            print(chr(stack_pop()), end='', flush=True)
       elif current_command == 6: #command-6 (pick up item at p0)
         if len(stack) > 1:
           p = stack_pop()
