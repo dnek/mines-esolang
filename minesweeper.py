@@ -312,11 +312,18 @@ def main():
     parse_start_time = perf_counter()
   parsed_data = parse_code(filename)
   if debug_mode:
+    parse_end_time = perf_counter()
+    print('   ', end='')
+    for i in range(len(parsed_data[0][0])):
+      print(str(i).rjust(3), end='')
+    print()
+    for i, l in enumerate(parsed_data[0]):
+      print(str(i).rjust(3), l)
     run_start_time = perf_counter()
   run(*parsed_data)
   if debug_mode:
     end_time = perf_counter()
-    print(f'parse: {run_start_time - parse_start_time}s, run: {end_time - run_start_time}s')
+    print(f'parse: {parse_end_time - parse_start_time}s, run: {end_time - run_start_time}s')
 
 if __name__ == "__main__":
   arg_parser = argparse.ArgumentParser()
