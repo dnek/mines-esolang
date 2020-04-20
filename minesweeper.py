@@ -8,7 +8,7 @@ from typing import List, Set, Tuple
 def parse_code(filename: str):
   raw_code = open(filename, encoding='utf-8').read().split(sep='\n')
   comment_re = re.compile(r'#.*')
-  line_re = re.compile(r'[^.*\-0-9,]+')
+  line_re = re.compile(r'\s+', flags=re.ASCII)
   formatted_code = list(map(lambda line: re.sub(line_re, '', re.sub(comment_re, '', line)), raw_code))
   width = len(formatted_code[0])
   if width == 0:
