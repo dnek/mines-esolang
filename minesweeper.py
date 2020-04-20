@@ -105,6 +105,7 @@ def run(field: List[List[int]],
   
   debug_mode: bool = args.debug
   if debug_mode:
+    output_debug = ''
     show_field: bool = args.field
     show_stack: bool = args.stack
     show_command: bool = args.command
@@ -158,6 +159,8 @@ def run(field: List[List[int]],
 
   def exexute_command(x: int, y: int):
     nonlocal current_revealed, ever_revealed, ever_rest_cells, ever_rest_mines, stack, command_pointer, recent_input, command_to_exec, stack_append
+    if debug_mode:
+      nonlocal output_debug
     current_command = field[x][y]
     if current_revealed[x][y]:
       if current_command == 0: #command-0r (duplicate top)
@@ -233,12 +236,18 @@ def run(field: List[List[int]],
           stack_append(ord(c))
       elif current_command == 4: #command-4 (output top as integer)
         if len(stack) > 0:
-          print(stack_pop(), end='', flush=True)
+          p = stack_pop()
+          print(p, end='', flush=True)
+          if debug_mode:
+            output_debug += str(p)
       elif current_command == 5: #command-5 (output top as char)
         if len(stack) > 0:
           p = stack[-1]
           if p > -1 and p < 0x110000:
-            print(chr(stack_pop()), end='', flush=True)
+            c = chr(stack_pop())
+            print(c, end='', flush=True)
+            if debug_mode:
+              output_debug += c
       elif current_command == 6: #command-6 (pick up item at p0)
         if len(stack) > 1:
           p = stack_pop()
@@ -315,6 +324,10 @@ def run(field: List[List[int]],
       print('**stack**')
       print(stack)
       print()
+    print('**whole output start**')
+    print(output_debug)
+    print('**whole output end**')
+    print()
 
 def main():
   filename = args.program_path
