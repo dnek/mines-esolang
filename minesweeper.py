@@ -283,7 +283,11 @@ def run(field: List[List[int]],
     if debug_mode:
       if show_field:
         print('**field**')
-        print(current_revealed)
+        for i in range(height):
+          for j in range(width):
+            number = field[i][j]
+            print((number if number > 0 else ' ') if current_revealed[i][j] else '#', end=' ')
+          print()
         print()
       if show_stack:
         print('**stack**')
@@ -299,7 +303,11 @@ def run(field: List[List[int]],
     print()
     if show_field:
       print('**field**')
-      print(current_revealed)
+      for i in range(height):
+        for j in range(width):
+          number = field[i][j]
+          print((number if number > 0 else ' ') if current_revealed[i][j] else '#', end=' ')
+        print()
       print()
     if show_stack:
       print('**stack**')
