@@ -237,12 +237,18 @@ def run(field: List[List[int]],
           command_pointer = (command_pointer + stack_pop()) % command_length
 
   while ever_rest_cells > 0 and ever_rest_mines > 0:
-    if command_to_exec == None:
-      command_pointer = (command_pointer + 1) % command_length
-      com_x, com_y = commands[command_pointer]
-    else:
+    if command_to_exec != None:
       com_x, com_y = command_to_exec
       command_to_exec = None
+    else:
+      command_pointer = (command_pointer + 1) % command_length
+      command_adress = commands[command_pointer]
+      if command_adress == None:
+        if debug_mode:
+          print('nop')
+          print()
+        continue
+      com_x, com_y = command_adress
 
     if debug_mode:
       if show_field:
