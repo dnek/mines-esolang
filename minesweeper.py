@@ -133,6 +133,7 @@ def run(field: List[List[int]],
   stack_append = stack.append
   stack_pop = stack.pop
   stack_insert = stack.insert
+  stack_clear = stack.clear
 
   int_re = re.compile(r'\s*(-?\d+)(.*)', flags=re.ASCII | re.DOTALL)
 
@@ -195,7 +196,8 @@ def run(field: List[List[int]],
                 else:
                   not_revealed_0_list.append(i_j)
           if len(not_revealed_list) > 0 and flagged_count == current_number:
-            if contain_mine: #command-9r (reset game)
+            if contain_mine: #command-9r (reset game & stack)
+              stack_clear()
               current_revealed = [[False] * width for _ in range_height]
               flagged = [[False] * width for _ in range_height]
               return 29
