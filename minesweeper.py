@@ -359,7 +359,7 @@ def run(field: List[List[int]],
         for i in range_height:
           for j in range_width:
             number = field[i][j]
-            print((number if number > 0 else ' ') if current_revealed[i][j] else '#', end=' ')
+            print('F' if flagged[i][j] else ('#' if not current_revealed[i][j] else (number if number > 0 else ' ')), end=' ')
           print()
         print()
       if show_stack:
