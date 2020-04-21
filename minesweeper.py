@@ -139,7 +139,7 @@ def run(field: List[List[int]],
   def reveal(x: int, y: int, is_mine: bool):
     nonlocal current_revealed, ever_revealed, ever_rest_cells, ever_rest_mines
     current_revealed[x][y] = True
-    flagged[x][y] = True
+    flagged[x][y] = False
     if not ever_revealed[x][y]:
       ever_revealed[x][y] = True
       if is_mine:
