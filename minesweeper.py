@@ -115,13 +115,15 @@ def run(field: List[List[int]],
   height = len(field)
   width = len(field[0])
   operations_length = len(operations)
+  range_height = range(height)
+  range_width = range(width)
 
 
-  current_revealed = [[False] * width for _ in range(height)]
-  ever_revealed = [[False] * width for _ in range(height)]
+  current_revealed = [[False] * width for _ in range_height]
+  ever_revealed = [[False] * width for _ in range_height]
   ever_rest_cells = height * width - mines
   ever_rest_mines = mines
-  flagged = [[False] * width for _ in range(height)]
+  flagged = [[False] * width for _ in range_height]
   stack = []
   operation_pointer = -1
   recent_input = ''
@@ -144,8 +146,9 @@ def run(field: List[List[int]],
       else:
         ever_rest_cells -= 1
   
-  def open_recursively(cells: List[Tuple[int, int]], return_sum: bool) -> int:
+  def open_recursively(cell: Tuple[int, int], return_sum: bool) -> int:
     ret = 0
+    cells = [cell]
     cells_append = cells.append
     cells_pop = cells.pop
     while(len(cells) > 0):
@@ -165,10 +168,10 @@ def run(field: List[List[int]],
     nonlocal current_revealed, ever_revealed, ever_rest_cells, ever_rest_mines, flagged, stack, operation_pointer, recent_input, opration_to_perform, stack_append
     if debug_mode:
       nonlocal output_debug
-    current_command = field[x][y]
+    current_number = field[x][y]
     if current_revealed[x][y]: # revealed
       if right_clicked:
-        if current_command == 0: #command-0r (push 0)
+        if current_number == 0: #command-0r (push 0)
           stack_append(0)
           return 20
         else: # command > 0
@@ -190,10 +193,10 @@ def run(field: List[List[int]],
                   not_revealed_list.append(i_j)
                 else:
                   not_revealed_0_list.append(i_j)
-          if len(not_revealed_list) > 0 and flagged_count == current_command:
+          if len(not_revealed_list) > 0 and flagged_count == current_number:
             if contain_mine: #command-9r (reset game)
-              current_revealed = [[False] * width for _ in range(height)]
-              flagged = [[False] * width for _ in range(height)]
+              current_revealed = [[False] * width for _ in range_height]
+              flagged = [[False] * width for _ in range_height]
               return 29
             else: #command-xp (push sum of revealed numbers)
               reveal_sum = 0
@@ -202,13 +205,13 @@ def run(field: List[List[int]],
                 reveal(c_x, c_y, False)
                 reveal_sum += field[c_x][c_y] # must precede 0s.
               for cell in not_revealed_0_list:
-                reveal_sum += open_recursively([cell, True])
+                reveal_sum += open_recursively(cell, True)
               return 9
-          elif current_command == 1: #command-1r (top == 0 ? 1 : 0)
+          elif current_number == 1: #command-1r (top == 0 ? 1 : 0)
             if len(stack) > 0:
               stack_append(1 if stack_pop() == 0 else 0)
               return 21
-          elif current_command == 2: #command-2r (roll top p1 items p0 times)
+          elif current_number == 2: #command-2r (roll top p1 items p0 times)
             if len(stack) > 1:
               roll_depth = stack[-2]
               if abs(roll_depth) + 1 < len(stack):
@@ -227,27 +230,27 @@ def run(field: List[List[int]],
                   del stack[:roll_time_mod]
                   stack[insert_index:insert_index] = roll_items
                 return 22
-          elif current_command == 3: #command-3r (input as integer)
+          elif current_number == 3: #command-3r (input as integer)
             recent_input += stdin.read()
             read_match = re.fullmatch(int_re, recent_input)
             if read_match != None:
               stack_append(int(read_match[1]))
               recent_input = read_match[2]
               return 23
-          elif current_command == 4: #command-4r (input as char)
+          elif current_number == 4: #command-4r (input as char)
             recent_input += stdin.read()
             if len(recent_input) > 0:
               c, recent_input = recent_input[0], recent_input[1:]
               stack_append(ord(c))
               return 24
-          elif current_command == 5: #command-5r (output top as integer)
+          elif current_number == 5: #command-5r (output top as integer)
             if len(stack) > 0:
               p = stack_pop()
               print(p, end='', flush=True)
               if debug_mode:
                 output_debug += str(p)
               return 25
-          elif current_command == 6: #command-6r (output top as char)
+          elif current_number == 6: #command-6r (output top as char)
             if len(stack) > 0:
               p = stack[-1]
               if p > -1 and p < 0x110000:
@@ -256,52 +259,52 @@ def run(field: List[List[int]],
                 if debug_mode:
                   output_debug += c
                 return 26
-          elif current_command == 7: #command-7r (skip p operations)
+          elif current_number == 7: #command-7r (skip p operations)
             if len(stack) > 0:
               operation_pointer = (operation_pointer + stack_pop()) % operations_length
               return 27
-          elif current_command == 8: #command-8r (perform right click(p1, p0))
+          elif current_number == 8: #command-8r (perform right click(p1, p0))
             if len(stack) > 1:
-              opration_to_perform = (stack_pop() % len(height), stack_pop() % len(height), True) # inverted.
+              opration_to_perform = (stack_pop() % height, stack_pop() % width, True) # inverted.
               return 28
       else: # left-clicked revealed
-        if current_command == 0: #command-0l (pop)
+        if current_number == 0: #command-0l (pop)
           if len(stack) > 0:
             stack_pop()
             return 10
-        elif current_command == 1: #command-1l (p > 0 ? 1 : 0)
+        elif current_number == 1: #command-1l (p > 0 ? 1 : 0)
           if len(stack) > 0:
             stack_append(1 if stack_pop() > 0 else 0)
             return 11
-        elif current_command == 2: #command-2l (duplicate top)
+        elif current_number == 2: #command-2l (duplicate top)
           if len(stack) > 0:
             stack_append(stack[-1])
             return 12
-        elif current_command == 3: #command-3l (p1 + p0)
+        elif current_number == 3: #command-3l (p1 + p0)
           if len(stack) > 1:
             stack_append(stack_pop() + stack_pop())
             return 13
-        elif current_command == 4: #command-4l (p1 - p0)
+        elif current_number == 4: #command-4l (p1 - p0)
           if len(stack) > 1:
             stack_append(-stack_pop() + stack_pop())
             return 14
-        elif current_command == 5: #command-5l (p1 * p0)
+        elif current_number == 5: #command-5l (p1 * p0)
           if len(stack) > 1:
             stack_append(stack_pop() * stack_pop())
             return 15
-        elif current_command == 6: #command-6l (p1 / p0)
+        elif current_number == 6: #command-6l (p1 / p0)
           if len(stack) > 1 and stack[-1] != 0:
             p0, p1 = stack_pop(), stack_pop()
             stack_append(p1 // p0)
             return 16
-        elif current_command == 7: #command-7l (p1 % p0)
+        elif current_number == 7: #command-7l (p1 % p0)
           if len(stack) > 1 and stack[-1] != 0:
             p0, p1 = stack_pop(), stack_pop()
             stack_append(p1 % p0)
             return 17
-        elif current_command == 8: #command-8l (perform left click(p1, p0))
+        elif current_number == 8: #command-8l (perform left click(p1, p0))
           if len(stack) > 1:
-            opration_to_perform = (stack_pop() % len(height), stack_pop() % len(height), False) # inverted.
+            opration_to_perform = (stack_pop() % height, stack_pop() % width, False) # inverted.
             return 18
     else: # not revealed
       if right_clicked: #command-f (swap top 2 items)
@@ -310,23 +313,21 @@ def run(field: List[List[int]],
           stack[-1], stack[-2] = stack[-2], stack[-1]
           return 30
       elif not flagged[x][y]: # left-clicked not flagged
-        if current_command == 0: #command-0n (push the number of revealed(>=1))
-          reveal_count = open_recursively([(x, y), False])
+        if current_number == 0: #command-0n (push the number of revealed(>=1))
+          reveal_count = open_recursively((x, y), False)
           stack_append(reveal_count)
           return 0
-        elif current_command == 9: #command-9l (reset game)
+        elif current_number == 9: #command-9l (reset game)
           reveal(x, y, True)
-          current_revealed = [[False] * width for _ in range(height)]
-          flagged = [[False] * width for _ in range(height)]
+          current_revealed = [[False] * width for _ in range_height]
+          flagged = [[False] * width for _ in range_height]
           return 19
         else: #command-1n-8n (push number)
           reveal(x, y, False)
-          stack_append(current_command)
-          return current_command
+          stack_append(current_number)
+          return current_number
 
     return -1
-
-
 
   while ever_rest_cells > 0 and ever_rest_mines > 0:
     if debug_mode:
@@ -354,8 +355,8 @@ def run(field: List[List[int]],
     if debug_mode:
       if show_field:
         print('**field**')
-        for i in range(height):
-          for j in range(width):
+        for i in range_height:
+          for j in range_width:
             number = field[i][j]
             print((number if number > 0 else ' ') if current_revealed[i][j] else '#', end=' ')
           print()
