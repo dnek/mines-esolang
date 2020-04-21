@@ -109,7 +109,8 @@ def run(field: List[List[int]],
       '7r: skip',
       '8r: perform(r)',
       '9r: reset(r)',
-      'f: swap' #30
+      'f: swap', #30
+      'e: command error'
     ]
 
   height = len(field)
