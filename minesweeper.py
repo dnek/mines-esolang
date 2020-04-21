@@ -177,7 +177,7 @@ def run(field: List[List[int]],
         if current_number == 0: #command-0r (push 0)
           stack_append(0)
           return 20
-        else: # command > 0
+        else: # number > 0
           flagged_count = 0
           not_revealed_count = 0
           not_revealed_0_list = []
@@ -340,7 +340,7 @@ def run(field: List[List[int]],
   while ever_rest_cells > 0 and ever_rest_mines > 0:
     if debug_mode:
       if operation_limit == 0:
-        print('Command limit exceeded.')
+        print('Operation limit exceeded.')
         break
       elif operation_limit > 0:
         operation_limit -= 1
@@ -409,7 +409,7 @@ if __name__ == "__main__":
   arg_parser.add_argument('-f', '--field', help="Show field each phase (require debug mode)", action="store_true")
   arg_parser.add_argument('-s', '--stack', help="Show stack each phase (require debug mode)", action="store_true")
   arg_parser.add_argument('-c', '--command', help="Show command each phase (require debug mode)", action="store_true")
-  arg_parser.add_argument('-l', '--limit', help="Limit operation perform count (require debug mode)", type=int)
+  arg_parser.add_argument('-l', '--limit', help="Limit operation count (require debug mode)", type=int)
   arg_parser.add_argument('program_path', help='Program path', type=str)
   args = arg_parser.parse_args()
   main()
