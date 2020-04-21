@@ -178,16 +178,17 @@ def run(field: List[List[int]],
           return 20
         else: # command > 0
           flagged_count = 0
+          not_revealed_count = 0
           not_revealed_0_list = []
           not_revealed_list = []
           contain_mine = False
-          for i in range(max(0, x - 1), min(height, y + 2)):
-            for j in range(max(0, x - 1), min(width, y + 2)):
+          for i in range(max(0, x - 1), min(height, x + 2)):
+            for j in range(max(0, y - 1), min(width, y + 2)):
               if flagged[i][j]:
                 flagged_count += 1
               elif not current_revealed[i][j]:
+                not_revealed_count += 1
                 i_j = (i, j)
-                not_revealed_list.append(i_j)
                 i_j_command = field[i][j]
                 if i_j_command == 9:
                   contain_mine = True
@@ -195,7 +196,7 @@ def run(field: List[List[int]],
                   not_revealed_list.append(i_j)
                 else:
                   not_revealed_0_list.append(i_j)
-          if len(not_revealed_list) > 0 and flagged_count == current_number:
+          if not_revealed_count > 0 and flagged_count == current_number:
             if contain_mine: #command-9r (reset game & stack)
               stack_clear()
               current_revealed = [[False] * width for _ in range_height]
@@ -209,6 +210,7 @@ def run(field: List[List[int]],
                 reveal_sum += field[c_x][c_y] # must precede 0s.
               for cell in not_revealed_0_list:
                 reveal_sum += open_recursively(cell, True)
+              stack_append(reveal_sum)
               return 9
           elif current_number == 1: #command-1r (top == 0 ? 1 : 0)
             if len(stack) > 0:
