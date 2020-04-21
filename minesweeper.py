@@ -56,7 +56,7 @@ def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int
         parsing_field = False
         height = len(is_mine)
         if height == 0:
-          raise NameError('There is no row of field.')
+          raise NameError('No field.')
         construct_field()
         commands_append(parse_command(line))
       else:
@@ -65,6 +65,8 @@ def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int
         is_mine_append(parsed_line)
     else:
       commands_append(parse_command(line))
+  if len(operations) == 0:
+    raise NameError('No operation.')
   return field, mines, operations
 
 def run(field: List[List[int]],
