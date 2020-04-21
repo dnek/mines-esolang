@@ -370,10 +370,11 @@ def run(field: List[List[int]],
         print(f'exec "{command_names[command_number]}" at ({op_y}, {op_x})')
         print()
 
-    print('**whole output start**')
-    print(output_debug)
-    print('**whole output end**')
-    print()
+    if debug_mode:
+      print('**whole output start**')
+      print(output_debug)
+      print('**whole output end**')
+      print()
 
 def main():
   filename = args.program_path
