@@ -77,6 +77,7 @@ def run(field: List[List[int]],
     show_field: bool = args.field
     show_stack: bool = args.stack
     show_command: bool = args.command
+    operation_count = 0
     operation_limit: int = args.limit if args.limit else -1
     command_names = [
       '0p: push(count)', #0
@@ -344,6 +345,8 @@ def run(field: List[List[int]],
         break
       elif operation_limit > 0:
         operation_limit -= 1
+      operation_count += 1
+      print(f'operaion[{operation_count}]')
     if opration_to_perform != None:
       op_x, op_y, op_right = opration_to_perform
       opration_to_perform = None
@@ -361,6 +364,14 @@ def run(field: List[List[int]],
     command_number = perform_operation(op_x, op_y, op_right)
 
     if debug_mode:
+      if show_command:
+        print('**command**')
+        print(f'exec "{command_names[command_number]}" at ({op_y}, {op_x}) by {"right" if op_right else "left"}')
+        print()
+      if show_stack:
+        print('**stack**')
+        print(stack)
+        print()
       if show_field:
         print('**field**')
         for i in range_height:
@@ -368,13 +379,6 @@ def run(field: List[List[int]],
             number = field[i][j]
             print('F' if flagged[i][j] else ('#' if not current_revealed[i][j] else (number if number > 0 else '.')), end=' ')
           print()
-        print()
-      if show_stack:
-        print('**stack**')
-        print(stack)
-        print()
-      if show_command:
-        print(f'exec "{command_names[command_number]}" at ({op_y}, {op_x}) by {"right" if op_right else "left"}')
         print()
 
   if debug_mode:
