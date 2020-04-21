@@ -3,9 +3,9 @@ from collections import deque
 import re
 from sys import stdin
 from time import perf_counter
-from typing import List, Set, Tuple
+from typing import List, Tuple
 
-def parse_code(filename: str):
+def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int, bool]]]:
   raw_code = open(filename, encoding='utf-8').read().split(sep='\n')
   comment_re = re.compile(r'#.*')
   line_re = re.compile(r'\s+', flags=re.ASCII)
@@ -18,8 +18,6 @@ def parse_code(filename: str):
   is_mine = [] #[[bool]]
   field = [] #[[int]]
   mines = 0
-  open_set_list = [] #[set]
-  open_set_address = [] #[[int]]
   operations = [] #[(int, int, bool)]
 
   row_re = re.compile(r'[.*]{{{width}}}'.format(width=width))
@@ -39,33 +37,6 @@ def parse_code(filename: str):
             if is_mine[i][j]:
               mine_count += 1
         field[x][y] = mine_count
-
-  def construct_open_set():
-    nonlocal open_set_list, open_set_address
-    open_set_address = [[-1] * width for _ in range(height)]
-    open_set_list_append = open_set_list.append
-    for x in range(height):
-      for y in range(width):
-        if open_set_address[x][y] == -1 and field[x][y] == 0:
-          open_set_list_index = len(open_set_list)
-          open_set_address[x][y] = open_set_list_index
-          x_y = (x, y)
-          open_set = set([x_y])
-          search_que = deque([x_y])
-          open_set_add = open_set.add
-          search_que_append = search_que.append
-          search_que_pop = search_que.pop
-          while(len(search_que) > 0):
-            o_x, o_y = search_que_pop()
-            for i in range(max(0, o_x - 1), min(height - 1, o_x + 1) + 1):
-              for j in range(max(0, o_y - 1), min(width - 1, o_y + 1) + 1):
-                if open_set_address[i][j] == -1:
-                  i_j = (i, j)
-                  open_set_add(i_j)
-                  open_set_address[i][j] = open_set_list_index
-                  if field[i][j] == 0:
-                    search_que_append(i_j)
-          open_set_list_append(open_set)
 
   def parse_command(line: str) -> (int, int, bool):
     if len(line) == 0:
@@ -87,7 +58,6 @@ def parse_code(filename: str):
         if height == 0:
           raise NameError('There is no row of field.')
         construct_field()
-        construct_open_set()
         commands_append(parse_command(line))
       else:
         parsed_line = [c == '*' for c in line]
@@ -95,12 +65,10 @@ def parse_code(filename: str):
         is_mine_append(parsed_line)
     else:
       commands_append(parse_command(line))
-  return field, mines, open_set_list, open_set_address, operations
+  return field, mines, operations
 
 def run(field: List[List[int]],
     mines: int,
-    open_set_list: List[Set[Tuple[int, int]]],
-    open_set_address: List[List[int]],
     operations: List[Tuple[int, int, bool]]):
   
   debug_mode: bool = args.debug
@@ -111,25 +79,37 @@ def run(field: List[List[int]],
     show_command: bool = args.command
     operation_limit: int = args.limit if args.limit else -1
     command_names = [
-      '0: push',
-      '1: not',
-      '2: in(n)',
-      '3: in(c)',
-      '4: out(n)',
-      '5: out(c)',
-      '6: pick',
-      '7: insert',
-      '8: skip',
-      '9: reset',
-      '0r: dup',
-      '1r: pop',
-      '2r: add',
-      '3r: sub',
-      '4r: mul',
-      '5r: div',
-      '6r: mod',
-      '7r: positive',
-      '8r: exec',
+      '0p: push(count)', #0
+      '1p: push(1)',
+      '2p: push(2)',
+      '3p: push(3)',
+      '4p: push(4)',
+      '5p: push(5)',
+      '6p: push(6)',
+      '7p: push(7)',
+      '8p: push(8)',
+      'xp: push(sum)',
+      '0l: pop', #10
+      '1l: positive',
+      '2l: dup',
+      '3l: add',
+      '4l: sub',
+      '5l: multi',
+      '6l: div',
+      '7l: mod',
+      '8l: perform(l)',
+      '9l: reset(l)',
+      '0r: push0', #20
+      '1r: not',
+      '2r: roll',
+      '3r: in(n)',
+      '4r: in(c)',
+      '5r: out(n)',
+      '6r: out(c)',
+      '7r: skip',
+      '8r: perform(r)',
+      '9r: reset(r)',
+      'f: swap' #30
     ]
 
   height = len(field)
@@ -181,17 +161,17 @@ def run(field: List[List[int]],
               cells_append(i_j)
     return ret
 
-  def perform_operation(x: int, y: int, right_clicked: bool):
+  def perform_operation(x: int, y: int, right_clicked: bool) -> int:
     nonlocal current_revealed, ever_revealed, ever_rest_cells, ever_rest_mines, flagged, stack, operation_pointer, recent_input, opration_to_perform, stack_append
     if debug_mode:
       nonlocal output_debug
     current_command = field[x][y]
     if current_revealed[x][y]: # revealed
       if right_clicked:
-        if current_command == 0: #command-0r (duplicate top)
-          if len(stack) > 0:
-            stack_append(stack[-1])
-        else:
+        if current_command == 0: #command-0r (push 0)
+          stack_append(0)
+          return 20
+        else: # command > 0
           flagged_count = 0
           not_revealed_0_list = []
           not_revealed_list = []
@@ -211,112 +191,140 @@ def run(field: List[List[int]],
                 else:
                   not_revealed_0_list.append(i_j)
           if len(not_revealed_list) > 0 and flagged_count == current_command:
-            if contain_mine: #command-9n (restart game)
+            if contain_mine: #command-9r (reset game)
               current_revealed = [[False] * width for _ in range(height)]
               flagged = [[False] * width for _ in range(height)]
-            else: #command-xn (push sum of revealed numbers)
+              return 29
+            else: #command-xp (push sum of revealed numbers)
               reveal_sum = 0
               for cell in not_revealed_list:
                 c_x, c_y = cell
-                reveal(c_x, c_y)
+                reveal(c_x, c_y, False)
                 reveal_sum += field[c_x][c_y] # must precede 0s.
               for cell in not_revealed_0_list:
                 reveal_sum += open_recursively([cell, True])
-          elif current_command == 1: #command-1r (pop)
+              return 9
+          elif current_command == 1: #command-1r (top == 0 ? 1 : 0)
             if len(stack) > 0:
-              stack_pop()
-          elif current_command == 2: #command-2r (p1 + p0)
+              stack_append(1 if stack_pop() == 0 else 0)
+              return 21
+          elif current_command == 2: #command-2r (roll top p1 items p0 times)
             if len(stack) > 1:
-              stack_append(stack_pop() + stack_pop())
-          elif current_command == 3: #command-3r (p1 - p0)
-            if len(stack) > 1:
-              stack_append(-stack_pop() + stack_pop())
-          elif current_command == 4: #command-4r (p1 * p0)
-            if len(stack) > 1:
-              stack_append(stack_pop() * stack_pop())
-          elif current_command == 5: #command-5r (p1 / p0)
-            if len(stack) > 1 and stack[-1] != 0:
-              p0, p1 = stack_pop(), stack_pop()
-              stack_append(p1 // p0)
-          elif current_command == 6: #command-6r (p1 % p0)
-            if len(stack) > 1 and stack[-1] != 0:
-              p0, p1 = stack_pop(), stack_pop()
-              stack_append(p1 % p0)
-          elif current_command == 7: #command-7r (p > 0 ? 1 : 0)
+              roll_depth = stack[-2]
+              if abs(roll_depth) + 1 < len(stack):
+                roll_time = stack_pop()
+                stack_pop()
+                if roll_time > 0:
+                  roll_time_mod = roll_time % roll_depth
+                  insert_index = len(stack) - roll_depth
+                  roll_items = stack[-roll_time_mod:]
+                  del stack[-roll_time_mod:]
+                  stack[insert_index:insert_index] = roll_items
+                elif roll_time < 0:
+                  roll_time_mod = roll_time % -roll_depth
+                  insert_index = -roll_depth - roll_time_mod
+                  roll_items = stack[:roll_time_mod]
+                  del stack[:roll_time_mod]
+                  stack[insert_index:insert_index] = roll_items
+                return 22
+          elif current_command == 3: #command-3r (input as integer)
+            recent_input += stdin.read()
+            read_match = re.fullmatch(int_re, recent_input)
+            if read_match != None:
+              stack_append(int(read_match[1]))
+              recent_input = read_match[2]
+              return 23
+          elif current_command == 4: #command-4r (input as char)
+            recent_input += stdin.read()
+            if len(recent_input) > 0:
+              c, recent_input = recent_input[0], recent_input[1:]
+              stack_append(ord(c))
+              return 24
+          elif current_command == 5: #command-5r (output top as integer)
             if len(stack) > 0:
-              stack_append(1 if stack_pop() > 0 else 0)
-          elif current_command == 8: #command-8r (exec open[p1][p0])
-            if len(stack) > 1:
-              opration_to_perform = (stack_pop() % len(height), stack_pop() % len(height)) # inverted.
-      else: # left-clicked revealed
-        if current_command == 1: #command-1 (top == 0 ? 1 : 0)
-          if len(stack) > 0:
-            stack_append(1 if stack_pop() == 0 else 0)
-        elif current_command == 2: #command-2 (input as integer)
-          recent_input += stdin.read()
-          read_match = re.fullmatch(int_re, recent_input)
-          if read_match == None:
-            return
-          else:
-            stack_append(int(read_match[1]))
-            recent_input = read_match[2]
-        elif current_command == 3: #command-3 (input as char)
-          recent_input += stdin.read()
-          if len(recent_input) > 0:
-            c, recent_input = recent_input[0], recent_input[1:]
-            stack_append(ord(c))
-        elif current_command == 4: #command-4 (output top as integer)
-          if len(stack) > 0:
-            p = stack_pop()
-            print(p, end='', flush=True)
-            if debug_mode:
-              output_debug += str(p)
-        elif current_command == 5: #command-5 (output top as char)
-          if len(stack) > 0:
-            p = stack[-1]
-            if p > -1 and p < 0x110000:
-              c = chr(stack_pop())
-              print(c, end='', flush=True)
+              p = stack_pop()
+              print(p, end='', flush=True)
               if debug_mode:
-                output_debug += c
-        elif current_command == 6: #command-6 (pick up item at p0)
-          if len(stack) > 1:
-            p = stack_pop()
-            if p < 0:
-              i = min(-p - 1, len(stack) - 1)
-              stack_append(stack_pop(i))
-            elif p > 0:
-              i = max(-p - 1, -len(stack))
-              stack_append(stack_pop(i))
-        elif current_command == 7: #command-7 (insert p1 into p0)
-          if len(stack) > 1:
-            p = stack_pop()
-            if p != 0:
-              p1 = stack_pop()
-              if p > 0:
-                stack_insert(-p, p1)
-              else:
-                stack_insert(-p - 1, p1)
-        elif current_command == 8: #command-8 (skip p commands)
+                output_debug += str(p)
+              return 25
+          elif current_command == 6: #command-6r (output top as char)
+            if len(stack) > 0:
+              p = stack[-1]
+              if p > -1 and p < 0x110000:
+                c = chr(stack_pop())
+                print(c, end='', flush=True)
+                if debug_mode:
+                  output_debug += c
+                return 26
+          elif current_command == 7: #command-7r (skip p operations)
+            if len(stack) > 0:
+              operation_pointer = (operation_pointer + stack_pop()) % operations_length
+              return 27
+          elif current_command == 8: #command-8r (perform right click(p1, p0))
+            if len(stack) > 1:
+              opration_to_perform = (stack_pop() % len(height), stack_pop() % len(height), True) # inverted.
+              return 28
+      else: # left-clicked revealed
+        if current_command == 0: #command-0l (pop)
           if len(stack) > 0:
-            operation_pointer = (operation_pointer + stack_pop()) % operations_length
+            stack_pop()
+            return 10
+        elif current_command == 1: #command-1l (p > 0 ? 1 : 0)
+          if len(stack) > 0:
+            stack_append(1 if stack_pop() > 0 else 0)
+            return 11
+        elif current_command == 2: #command-2l (duplicate top)
+          if len(stack) > 0:
+            stack_append(stack[-1])
+            return 12
+        elif current_command == 3: #command-3l (p1 + p0)
+          if len(stack) > 1:
+            stack_append(stack_pop() + stack_pop())
+            return 13
+        elif current_command == 4: #command-4l (p1 - p0)
+          if len(stack) > 1:
+            stack_append(-stack_pop() + stack_pop())
+            return 14
+        elif current_command == 5: #command-5l (p1 * p0)
+          if len(stack) > 1:
+            stack_append(stack_pop() * stack_pop())
+            return 15
+        elif current_command == 6: #command-6l (p1 / p0)
+          if len(stack) > 1 and stack[-1] != 0:
+            p0, p1 = stack_pop(), stack_pop()
+            stack_append(p1 // p0)
+            return 16
+        elif current_command == 7: #command-7l (p1 % p0)
+          if len(stack) > 1 and stack[-1] != 0:
+            p0, p1 = stack_pop(), stack_pop()
+            stack_append(p1 % p0)
+            return 17
+        elif current_command == 8: #command-8l (perform left click(p1, p0))
+          if len(stack) > 1:
+            opration_to_perform = (stack_pop() % len(height), stack_pop() % len(height), False) # inverted.
+            return 18
     else: # not revealed
       if right_clicked: #command-f (swap top 2 items)
         flagged[x][y] = not flagged[x][y]
         if len(stack) > 1:
           stack[-1], stack[-2] = stack[-2], stack[-1]
+          return 30
       elif not flagged[x][y]: # left-clicked not flagged
         if current_command == 0: #command-0n (push the number of revealed(>=1))
           reveal_count = open_recursively([(x, y), False])
           stack_append(reveal_count)
-
-        elif current_command == 9: #command-9n (restart game)
+          return 0
+        elif current_command == 9: #command-9l (reset game)
           reveal(x, y, True)
           current_revealed = [[False] * width for _ in range(height)]
           flagged = [[False] * width for _ in range(height)]
-        else:
+          return 19
+        else: #command-1n-8n (push number)
           reveal(x, y, False)
           stack_append(current_command)
+          return current_command
+
+    return -1
 
 
 
@@ -341,6 +349,8 @@ def run(field: List[List[int]],
         continue
       op_x, op_y, op_right = command_adress
 
+    command_number = perform_operation(op_x, op_y, op_right)
+
     if debug_mode:
       if show_field:
         print('**field**')
@@ -355,26 +365,9 @@ def run(field: List[List[int]],
         print(stack)
         print()
       if show_command:
-        print(f'exec "{command_names[field[op_x][op_y] + (10 if current_revealed[op_x][op_y] else 0)]}" at ({op_y}, {op_x})')
+        print(f'exec "{command_names[command_number]}" at ({op_y}, {op_x})')
         print()
 
-    perform_operation(op_x, op_y, op_right)
-
-  if debug_mode:
-    print()
-    if show_field:
-      print('**field**')
-      for i in range(height):
-        for j in range(width):
-          number = field[i][j]
-          c = 'F' if flagged[i][j] else ('#' if current_revealed[i][j] else (number if number > 0 else ' '))
-          print(c, end=' ')
-        print()
-      print()
-    if show_stack:
-      print('**stack**')
-      print(stack)
-      print()
     print('**whole output start**')
     print(output_debug)
     print('**whole output end**')
