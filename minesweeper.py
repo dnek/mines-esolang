@@ -218,13 +218,13 @@ def run(field: List[List[int]],
               if abs(roll_depth) + 1 < len(stack):
                 roll_time = stack_pop()
                 stack_pop()
-                if roll_time > 0:
+                if roll_depth > 0:
                   roll_time_mod = roll_time % roll_depth
                   insert_index = len(stack) - roll_depth
                   roll_items = stack[-roll_time_mod:]
                   del stack[-roll_time_mod:]
                   stack[insert_index:insert_index] = roll_items
-                elif roll_time < 0:
+                elif roll_depth < 0:
                   roll_time_mod = roll_time % -roll_depth
                   insert_index = -roll_depth - roll_time_mod
                   roll_items = stack[:roll_time_mod]
