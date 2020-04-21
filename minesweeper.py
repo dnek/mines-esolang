@@ -110,6 +110,7 @@ def run(field: List[List[int]],
       '8r: perform(r)',
       '9r: reset(r)',
       'f: swap', #30
+      'no: noop',
       'e: command error'
     ]
 
@@ -317,7 +318,9 @@ def run(field: List[List[int]],
         if len(stack) > 1:
           stack[-1], stack[-2] = stack[-2], stack[-1]
           return 30
-      elif not flagged[x][y]: # left-clicked not flagged
+      elif flagged[x][y]: # left-clicked flagged
+        return 31
+      else: # left-clicked not flagged
         if current_number == 0: #command-0n (push the number of revealed(>=1))
           reveal_count = open_recursively((x, y), False)
           stack_append(reveal_count)
@@ -350,7 +353,7 @@ def run(field: List[List[int]],
       if command_adress == None:
         if debug_mode:
           if show_command:
-            print('nop')
+            print('--blank line noop--')
             print()
         continue
       op_x, op_y, op_right = command_adress
@@ -371,7 +374,7 @@ def run(field: List[List[int]],
         print(stack)
         print()
       if show_command:
-        print(f'exec "{command_names[command_number]}" at ({op_y}, {op_x})')
+        print(f'exec "{command_names[command_number]}" at ({op_y}, {op_x}) by {"right" if op_right else "left"}')
         print()
 
   if debug_mode:
