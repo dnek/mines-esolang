@@ -174,26 +174,26 @@ p0, p1をポップした状態でスタックが `1, 2, 3, 4` の場合、深さ
 通常はこのようにする。
 
 ```
-$ python3 minesweeper.py examples/hello.mines
+$ python3 mines.py examples/hello.mines
 ```
 
 入力を取る場合は適宜 `echo` や `cat` を利用しても良い。
 
 ```
-$ echo -n "meow" | python3 minesweeper.py examples/cat.mines
+$ echo -n "meow" | python3 mines.py examples/cat.mines
 ```
 
 `-d` でデバッグモードを有効にする。
 
 ```
-$ python3 minesweeper.py examples/hello.mines -d
+$ python3 mines.py examples/hello.mines -d
 ```
 
 デバッグモードが有効なとき、`f`, `s`, `c`でそれぞれ各コマンド実行後の盤面、スタック、実行されたコマンドを出力する。
 また、`l`で指定した操作の回数を超えるとプログラムが強制終了される。
 
 ```
-$ python3 minesweeper.py examples/hello.mines -dfscl 42
+$ python3 mines.py examples/hello.mines -dfscl 42
 ```
 
 ## 作者
