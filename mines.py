@@ -3,7 +3,7 @@ from collections import deque
 import re
 from sys import stdin
 from time import perf_counter
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int, bool]]]:
   raw_code = open(filename, encoding='utf-8').read().split(sep='\n')
@@ -18,10 +18,10 @@ def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int
   is_mine = [] #[[bool]]
   field = [] #[[int]]
   mines = 0
-  operations = [] #[(int, int, bool)]
+  operations: List[Union[Tuple[int, int, bool], bool]] = []
 
   row_re = re.compile(r'[.*]{{{width}}}'.format(width=width))
-  command_re = re.compile(r'(0|-?[1-9][0-9]*)([,;])(0|-?[1-9][0-9]*)')
+  operation_re = re.compile(r'(0|-?[1-9][0-9]*)([,;])(0|-?[1-9][0-9]*)')
 
   def construct_field():
     nonlocal field
@@ -38,18 +38,20 @@ def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int
               mine_count += 1
         field[x][y] = mine_count
 
-  def parse_command(line: str) -> (int, int, bool):
+  def parse_operation(line: str) -> Union[Tuple[int, int, bool], bool]:
     if len(line) == 0:
-      return None
+      return False
+    elif line == '!':
+      return True
     else:
-      command_match = re.fullmatch(command_re, line)
-      if not command_match:
+      operation_match = re.fullmatch(operation_re, line)
+      if not operation_match:
         raise NameError(f"Command '{line}' is inconsistent.")
-      return (int(command_match[3]) % height, int(command_match[1]) % width, command_match[2] == ';') # inverted.
+      return (int(operation_match[3]) % height, int(operation_match[1]) % width, operation_match[2] == ';') # inverted.
 
   parsing_field = True
   is_mine_append = is_mine.append
-  commands_append = operations.append
+  oeprations_append = operations.append
   for line in formatted_code:
     if parsing_field:
       if not re.fullmatch(row_re, line):
@@ -58,21 +60,20 @@ def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int
         if height == 0:
           raise NameError('No field.')
         construct_field()
-        commands_append(parse_command(line))
+        oeprations_append(parse_operation(line))
       else:
         parsed_line = [c == '*' for c in line]
         mines += parsed_line.count(True)
         is_mine_append(parsed_line)
     else:
-      commands_append(parse_command(line))
+      oeprations_append(parse_operation(line))
   if len(operations) == 0:
     raise NameError('No operation.')
   return field, mines, operations
 
 def run(field: List[List[int]],
     mines: int,
-    operations: List[Tuple[int, int, bool]]):
-  
+    operations: List[Union[Tuple[int, int, bool], bool]]):
   debug_mode: bool = args.debug
   if debug_mode:
     output_debug = ''
@@ -114,6 +115,7 @@ def run(field: List[List[int]],
       '9r: reset(r)',
       'f: swap', #30
       'no: noop',
+      'rv: reverse',
       'e: command error'
     ]
 
@@ -131,6 +133,7 @@ def run(field: List[List[int]],
   flagged = [[False] * width for _ in range_height]
   stack = []
   operation_pointer = -1
+  flag_mode = False
   recent_input = ''
   opration_to_perform = None
 
@@ -175,6 +178,7 @@ def run(field: List[List[int]],
     if debug_mode:
       nonlocal output_debug
     current_number = field[x][y]
+    right_clicked ^= flag_mode
     if current_revealed[x][y]: # revealed
       if right_clicked:
         if current_number == 0: #command-0r (push 0)
@@ -355,20 +359,35 @@ def run(field: List[List[int]],
     else:
       operation_pointer = (operation_pointer + 1) % operations_length
       command_adress = operations[operation_pointer]
-      if command_adress == None:
+      if command_adress == False:
         if debug_mode:
           if show_command:
+            print('**command**')
             print('--blank line noop--')
             print()
         continue
-      op_x, op_y, op_right = command_adress
+      elif command_adress == True: #command-rv (reverse stack)
+        flag_mode = not flag_mode
+        stack.reverse()
+        if debug_mode:
+          if show_command:
+            print('**command**')
+            print(f'exec "{command_names[32]}"')
+            print()
+          if show_stack:
+            print('**stack**')
+            print(stack)
+            print()
+        continue
+      else:
+        op_x, op_y, op_right = command_adress
 
     command_number = perform_operation(op_x, op_y, op_right)
 
     if debug_mode:
       if show_command:
         print('**command**')
-        print(f'exec "{command_names[command_number]}" at ({op_y}, {op_x}) by {"right" if op_right else "left"}')
+        print(f'exec "{command_names[command_number]}" at ({op_y}, {op_x}) by {"right" if op_right else "left"} in {"flag" if flag_mode else "normal"} mode')
         print()
       if show_stack:
         print('**stack**')
