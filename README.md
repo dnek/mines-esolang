@@ -202,7 +202,7 @@ $ python3 minesweeper.py examples/hello.mines -dfscl 42
 
 ### 関連する制作物
 
-- [pietron](https://github.com/dnek/pietron) - 難解プログラミング言語PietのIDE。Minesの仕様はPietの影響を受けています。
+- [Pietron](https://github.com/dnek/pietron) - 難解プログラミング言語PietのIDE。Minesの仕様はPietの影響を受けています。
 
 - [UnambiSweeper](https://dnek.app/unambi) - 最後まで論理的に解けるマインスイーパーアプリ。AndroidとiOSに対応しています。
 
