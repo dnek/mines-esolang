@@ -1,36 +1,38 @@
 # Mines
 
-マインスイーパーから着想を得た難解プログラミング言語。
+An esoteric language inspired by Minesweeper.
 
-## 概要
+- 日本語はこちら（[README_ja.md](README_ja.md)）。
 
-Minesはプログラムがマインスイーパーのゲームプレイを模した操作によって実行される言語である。
+## Overview
 
-## プログラム記述仕様
+Mines is a programming language in which programs are executed by operations that mimic the gameplay of Minesweeper.
 
-Minesのプログラムは1つの盤面と1つの操作リストがこの順に改行区切りで記述されたものである。
+## Program description
 
-**盤面**は `.` と `*` からなる長方形のグリッドで表される。
-`.` は安全なマス、 `*` は地雷のあるマスを表す。
+A Mines program consists of a field and an operation list in this order with a line break.
 
-**操作リスト**は `\n` で区切られた1つ以上の操作からなる。
+**Field** is represented by a rectangular grid consisting of `.` and `*`.
+Where `.` is a safe cell, and `*` is a mine cell.
 
-1つの**操作**は `,` または`;` で区切られた2つの整数、あるいは `!` 、あるいは空行で表される。
-盤面の直後及びファイル末尾に書かれた**空行**も操作として数えられる。
+**Operation list** consists of one or more operations separated by `\n`.
 
-**2つの整数**は盤面の左上からの列及び行番号を表し、区切り文字はクリックするマウスボタンを指定する。
-`,` は左クリック、 `;` は右クリックを指す。
+**An operation** is represented by two integers separated by `,` or `;`, or `!`, or a blank line.
+Blank lines immediately after the field and at the end of the file are also counted as operations.
 
-**列及び行番号**は負数でも盤面の範囲外を指していても良い。
-これらはそれぞれ盤面の幅ないし高さで割った非負剰余に変換される。
+**Two integers** indicate the column and row numbers from the top left of the field, and the delimiter indicates the mouse button to click.
+Where `,` is a left click and `;` is a right click.
 
-**`!`** は旗立てモードの切り替えを表す（後述）。
+**Column and row numbers** may be negative or point outside the range of the field.
+These are converted into non-negative remainders divided by the width or height of the field, respectively.
 
-プログラム中に現れる半角空白及び `\t\r\f\v` の各文字は無視される。
-また、`#` から行末までの文字列は無視される。
-つまりプログラムは**コメント**を含むことができる。
+**`!`** indicates the flagging mode switch (see below).
 
-以下に、幅4高さ3の盤面と5つの操作を持つプログラムの例とそれぞれの操作の意味を示す。
+Half-width whitespaces and characters in `\t\r\f\v` appearing in the program are ignored.
+Also, strings from # to the end of the line are ignored.
+This means that the program can contain **comments**.
+
+The following is an example of a program with a 4x3 field and 5 operations, and the meaning of each operation.
 
 ```
 .*.* #This is a comment.
@@ -43,213 +45,218 @@ Minesのプログラムは1つの盤面と1つの操作リストがこの順に�
 !
 ```
 
-| 操作 | 意味 |
+| Operation | Meaning |
 ----|----
-| `0,0` | 左上のマスを左クリック |
-| `-1,-1` | 右下のマスを左クリック（ `3,2` と同等） |
-|  | 何もしない |
-| `9;-10`| 左から(9 % 4)番目、上から(-10 % 3)番目のマスを右クリック（ `1;2` と同等） |
-| `!`| 旗立てモードの切り替え |
+| `0,0` | Left click on the top left cell. |
+| `-1,-1` | Right click on the bottom right cell (equal to `3,2` ). |
+|  | do nothing. |
+| `9;-10` | Right-click on the (9 % 4)th cell from the left and the (-10 % 3)th cell from the top (equal to `1;2` ). |
+| `!` | Switch the flagging mode. |
 
-## プログラムの処理
+## Program processing
 
-Minesのインタプリタは1つの**操作ポインタ(OP)**を持ち、初期状態では操作リストの一番上を指している。
-インタプリタは盤面に対してOPの指す操作を行い、その後OPを1つ進める。
-一番下の操作が行われると、OPは一番上の操作に戻り、操作を続行する。
+The Mines interpreter has a **operation pointer** (OP), which by default points to the top of the operation list.
+The interpreter performs an operation pointed by OP on the field and then advances the OP by one.
+After the bottom operation is performed, the OP returns to the top operation and continues operations.
 
-各操作が行われるごとに、その結果及びその操作が行われたマスの状態に応じて**命令**が選ばれ、実行される。
+For each operation, **an command** is selected and executed according to the result and the state of the cell in which the operation was performed.
 
-**ゲームオーバー**となる操作をした場合、プログラムは終了せず、盤面が初期状態（マスが空いておらず旗もない状態）に戻りゲームが再開される（OPは初期化されない）。
+If **game over** is occurred by an operation, the program does not terminate and the field returns to its initial state (no revealed cells and no flags) and the game resumes (the OP is not initialized).
 
-インタプリタは記憶領域として符号付き整数の**スタック**を1つ持ち、これは命令によって操作される。
-スタックの初期状態は空であり、処理系の許す限り無限に値を持ち得る。
+The interpreter has **a stack** of signed integers for storage, which is manipulated by the commands.
+The initial state of the stack is empty, and it can have an infinite number of values as long as the processing system allows.
 
-また、インタプリタは**旗立てモード**を管理しており、初期値はオフである。
-旗立てモードの切り替えにより、オンまたはオフに切り替わる。
-また、ゲームオーバーによって旗立てモードが初期化されることはない。
+In addition, the interpreter manages **the flagging mode**, which is initially off.
+It is toggled between on and off by an operation of the flagging mode switch.
+Game over does not initialize the flag mode.
 
-各命令の実行後、もしも「それぞれの安全なマス」または「それぞれの地雷マス」が全ゲームプレイを通じて1回以上開かれたことがあれば、プログラムは**終了**する（この挙動は通常のマインスイーパーにおけるゲームクリアと異なる）。
+After each command is executed, if "each safe cell" or "each mine cell" is opened one or more times throughout the entire gameplay, the program **terminates** (this behavior is different from game clear on a regular minesweeper).
 
-## 操作の振る舞い
+## Performance of operations
 
-**左クリック**はほとんどのマインスイーパーアプリにおけるそれと同じように振る舞う。
+**Left click** behaves just like it does in most minesweeper apps.
 
-開かれていないマスに対する左クリックはそのマスを開ける。
-もし地雷を開けばゲームオーバーとなる。
+Left click on an unopened cell will open it.
+If you open a mine, it's game over.
 
-開かれたマスに対する左クリックは盤面に影響を及ぼさないが、何らかの命令が実行され得る。
+Left click on a revealed cell has no effect on the field, but some command may be executed.
 
-**右クリック**も多くのマインスイーパーアプリにおけるそれと同じように振る舞う。
+**Right click** also behaves like it does in many minesweeper apps.
 
-開かれていないマスに対する右クリックは旗を立てるか取り除く。
+Right click on an unopened cell will put up a flag or remove it.
 
-開かれたマスに対する右クリックは、もしマスに書かれた数字がその周囲に立っている旗の数と一致すれば、すべての開かれていない隣接するマスを開こうとする。
-もし地雷を開こうとしていればゲームオーバーとなる。
-この操作は「Chord」と呼ばれており、アプリによってはChordを長押しや他のマウスボタンに紐付けている場合がある。
+Right click on a revealed cell will open all adjacent unopened cells if the number on the cell is equal to the number of flags standing around it.
+If trying to open some mines, it's game over.
+This operation is called "Chord" and in some apps, Chord is bound to a long press or other mouse button.
 
-いずれのクリックにおいても開かれたマスが空白の場合、その周囲のマスも再帰的に開かれる（旗が立っていた場合旗が取り除かれ開けられる）。
+If a cell opened by either click is empty, the surrounding cells are also opened recursively (the flags standing in the cell being opened are removed and opened).
 
-**旗立てモードの切り替え**はほとんどのモバイル向けマインスイーパーアプリに備わっている機能であり、それと同様に振る舞う。
-旗立てモードがオンであるとき、左クリックと右クリックの扱いが入れ替わる。
-例えば開かれていないマスに対する左クリックは旗を立てるか取り除き、それに応じた命令が実行される。
+**Flagging mode switch** is a feature that most mobile minesweeper apps have, and it behaves just as well.
+When the flagging mode is on, the left-click and right-click are treated swapped.
+For example, left click on an unopened cell will put up a flag or remove it, and the command corresponding to it will be executed.
 
-**空行**の操作では何も起こらない（OPは通常通り進む）。
+Nothing happens with an operation of **blank line** (the OP proceeds as usual).
 
-## 命令
+## Commands
 
-マスの数字「0」は空白マス、「9」は地雷マスを表す。
+The cell number "0" represents a blank cell and the number "9" represents a mine cell.
 
-「プッシュ」「ポップ」などはすべてスタックに対する操作を指す。
+"Push", "pop", etc. all refer to operations on the stack.
 
-命令中で最初にポップした値を「p0」、次にポップした値を「p1」とする。
+The first popped value in a command is "p0" and the next popped value is "p1".
 
-### コマンドエラー
+### Command errors
 
-ポップ回数分の値がスタックになかったり0除算をしようとするなどして命令を正しく実行できないことを**コマンドエラー**と呼ぶ。
-命令の実行中にコマンドエラーが発生しそうな場合、命令はなかったことにされ、OPが次に進む。
-なお、ゲームオーバーはコマンドエラーではない。
+When a command cannot be executed correctly because there are not enough values for pops in the stack or 0 division is attempted or so on, this is called **a command error**.
+If a command error is likely to occur during the execution, it is treated as if there was no command and the OP proceeds to the next.
+Note that game over is not a command error.
 
-ポップ回数が足りない場合以外のコマンドエラーの発生条件は以下の表に示す。
+The conditions for the occurrence of a command error except for insufficient number of pops are shown in the following tables.
 
-### 旗立てモードの切り替え
+### Flagging mode switch
 
-| 命令名 | ポップ回数 | 内容 | エラー条件 |
+| Command name | Pop count | Description | error condition |
 ----|----|----|----
-| reverse | 0 | スタック全体の要素を逆順に並び替える | - |
+| reverse | 0 | Reverse order of the elements in the entire stack. | - |
 
-### 開いていないマスを左クリック
+### Left click on an unopened cell
 
-#### マスに旗が立っている場合
+#### Flag is standing on the cell
 
-| 命令名 | ポップ回数 | マスの数字 | 内容 | エラー条件 |
+| Command name | Pop count | Cell number | Description | error condition |
 ----|----|----|----|----
-| noop | 0 | どれでも（判明しないので） | 何もしない | - |
+| noop | 0 | Any (because not revealed) | Do nothing | - |
 
-#### マスに旗が立っていない場合
+#### Flag is not standing on the cell
 
-| 命令名 | ポップ回数 | マスの数字 | 内容 | エラー条件 |
+| Command name | Pop count | Cell number | Description | error condition |
 ----|----|----|----|----
-| push(count) | 0 | 0 | このクリックによって開かれたマスの個数（≧1）をスタックにプッシュ | - |
-| push(n) | 0 | 1〜8 | マスに書かれた数字をプッシュ | - |
-| reset(l) | 0 | 9 | 盤面を初期状態に戻してゲームを再開（スタック及びOPはリセットされない、このマスは開かれたことになる） | - |
+| push(count) | 0 | 0 | Push the number of cells opened by this click (≧1) | - |
+| push(n) | 0 | 1〜8 | Push the number written in the cell | - |
+| reset(l) | 0 | 9 | Reset the field to its initial state and resume the game (stack and OP are not reset, this cell is regarded as opened) | - |
 
-### 開いていないマスを右クリック
+### Right click on an unopened cell
 
-| 命令名 | ポップ回数 | マスの数字 | 内容 | エラー条件 |
+| Command name | Pop count | Cell number | Description | error condition |
 ----|----|----|----|----
-| swap | 2 | どれでも（判明しないので） | p0をプッシュしてp1をプッシュ | - |
+| swap | 2 | Any (because not revealed) | Push p0, then push p1 | - |
 
-### 開いているマスを左クリック
+### Left click on an revealed cell
 
-| 命令名 | ポップ回数 | マスの数字 | 内容 | エラー条件 |
+| Command name | Pop count | Cell number | Description | error condition |
 ----|----|----|----|----
-| pop | 1 | 0 | ポップ | - |
-| positive | 1 | 1 | p0が正であれば1、正でなければ0をプッシュ | - |
-| dup | 1 | 2 | p0を2回プッシュ | - |
-| add | 2 | 3 | (p1 + p0)をプッシュ | - |
-| sub | 2 | 4 | (p1 - p0)をプッシュ | - |
-| mul | 2 | 5 | (p1 * p0)をプッシュ | - |
-| div | 2 | 6 | (p1 / p0)をプッシュ | 0除算 |
-| mod | 2 | 7 | (p1 % p0)をプッシュ | 0除算 |
-| perform(l) | 2 | 8 | 操作「`p1,p0`」を行う | - |
+| pop | 1 | 0 | Pop | - |
+| positive | 1 | 1 | Push 1 if p0 is positive, else push 0 | - |
+| dup | 1 | 2 | Push p0 twice | - |
+| add | 2 | 3 | Push (p1 + p0) | - |
+| sub | 2 | 4 | Push (p1 - p0) | - |
+| mul | 2 | 5 | Push (p1 * p0) | - |
+| div | 2 | 6 | Push (p1 / p0) | 0 division |
+| mod | 2 | 7 | Push (p1 % p0) | 0 division |
+| perform(l) | 2 | 8 | Perform an operation of "`p1,p0`" | - |
 
-### 開いているマスを右クリック
+### Right click on an revealed cell
 
-#### 新たに1個以上のマスを開こうとした場合 (Chord)
+#### Try to open one or more new cells (Chord)
 
-| 命令名 | ポップ回数 | 結果 | 内容 | エラー条件 |
+| Command name | Pop count | Result | Description | error condition |
 ----|----|----|----|----
-| push(sum) | 0 | 成功 | このクリックによって開かれたマスに書かれた数字の合計をスタックにプッシュ | - |
-| reset(r) | スタックの長さ | ゲームオーバー | 盤面及びスタックを初期状態に戻してゲームを再開（OPはリセットされない、どのマスも開かれたことにはならない） | - |
+| push(sum) | 0 | Success | Push the sum of the numbers written in the cells opened by this click | - |
+| reset(r) | Length of stack | Game over | Reset the field and the stack to their initial states and resume the game (OP is not reset, the cells are not regarded as opened) | - |
 
-#### それ以外の場合
-| 命令名 | ポップ回数 | マスの数字 | 内容 | エラー条件 |
+#### Otherwise
+| Command name | Pop count | Cell number | Description | error condition |
 ----|----|----|----|----
-| push(0) | 0 | 0 | 0をプッシュ | - |
-| not | 1 | 1 | p0が0であれば1、0でなければ1をプッシュ | - |
-| roll | 2 | 2 | スタックの深さp1までの値をp0回回転させる（詳しくは「rollの詳細」を参照） | p1の絶対値がスタックの長さを超える |
-| in(n) | 0 | 3 | 標準入力の先頭から整数としてパースした値を1つ取りプッシュ | パースできない |
-| in(c) | 0 | 4 | 標準入力から文字を1つ取りそのUnicode値をプッシュ | 入力が空 |
-| out(n) | 1 | 5 | p0を標準出力に出力 | - |
-| out(c) | 1 | 6 | Unicode値がp0である文字を標準出力に出力 | p0が有効なUnicode値でない |
-| skip | 1 | 7 | OPにp0を加算する（オーバーフローした場合ループする） | - |
-| perform(r) | 2 | 8 | 操作「`p1;p0`」を行う | - |
+| push(0) | 0 | 0 | Push 0 | - |
+| not | 1 | 1 | Push 1 if p0 is 0, else push 0 | - |
+| roll | 2 | 2 | Roll the values up to stack depth p1 p0 times (see "Roll Details" for details) | The absolute value of p1 exceeds the length of the stack |
+| in(n) | 0 | 3 | Take one integer-parsed value from the beginning of the standard input and push it | Can not parse |
+| in(c) | 0 | 4 | Take a single character from the standard input and push its Unicode value | Empty input |
+| out(n) | 1 | 5 | Output p0 to the standard output | - |
+| out(c) | 1 | 6 | Output a single character whose Unicode value is p0 to the standard output | Invalid Unicode value |
+| skip | 1 | 7 | Add p0 to the OP (loop if overflow occurs) | - |
+| perform(r) | 2 | 8 | Perform an operation of "`p1;p0`" | - |
 
-##### rollの詳細
+##### Roll details
 
-p0, p1をポップした状態でスタックが `1, 2, 3, 4` の場合、深さ3までの値を1回回転させると `1, 4, 2, 3` のようにトップの値が下に埋め込まれる。
+If the stack is `1, 2, 3, 4` with p0 and p1 popped, a single rotation of a value up to a depth of 3 embeds the top value underneath and the stack becomes `1, 4, 2, 3`.
 
-回転数が負の場合、例えば-1回転させると `1, 3, 4, 2` のように逆の操作が行われる。
+If the number of rotations is negative, for example, if the number of rotations is -1, the opposite manipulatation will be performed and it becomes `1, 3, 4, 2`.
 
-深さが負の場合、例えば1回転させると `2, 3, 1, 4` のようにスタックのボトムから操作される。
+If the depth is negative, e.g. one rotation, the stack is manipulated from the bottom and becomes `2, 3, 1, 4`.
 
-## 実装例
+## Examples of implementation
 
-こちら ([examples/](examples)) 。
+See [examples/](examples) 。
 
-## インストール
+## Install
 
 ```
 pip3 install mines-esolang
 ```
 
-バージョンが表示されるか確認する。
+Make sure it displays the version.
 
 ```
 mines -V
 ```
 
-## インタプリタの実行方法
+## How to run the interpreter
 
-通常はこのようにする。
+Usually do like this.
 
 ```
 $ mines examples/hello.mines
 ```
 
-`d` でデバッグモードを有効にする。
-各マスの数字表やコードのパース及び実行にかかった時間が出力される。
+You can also run it directly from the source file.
+
+```
+$ python3 mines/mines.py examples/hello.mines
+```
+
+Activate the debug mode with `d`.
+This outputs a table of numbers in each cell, the time taken to parse the code, and the time taken to run it.
 
 ```
 $ mines examples/hello.mines -d
 ```
 
-デバッグモードが有効なとき、`c`, `s`, `f`でそれぞれ各操作実行後のコマンド、スタック、盤面を出力する。
-また、`l`で指定した操作回数でステップ実行することができる。
+When the debug mode is active, the command, the stack and the field are output by `c`, `s` and `f` respectively after each operation.
+Also, you can perform step executions at the number of operations specified by `l`.
 
 ```
 $ mines examples/hello.mines -dcsfl 42
 ```
 
-ファイルから入力を取る場合は `i` でファイルパスを指定する。
+To get input from a file, specify the file path with `i`.
 
 ```
 $ mines examples/cat.mines -i README.md
 ```
 
-直接入力を指定する場合は `e` を使う。
+To specify a direct input, use `e`.
 
 ```
 $ mines examples/add.mines -e "1 2"
 ```
 
-適宜 `echo` や `cat` を利用しても良い。
+You can use `echo` or `cat` if you want.
 
 ```
 $ echo -n "meow" | mines examples/cat.mines
 ```
 
-## 作者
+## Author
 
 - **[DNEK](https://github.com/dnek)**
 
-### 関連する制作物
+### Related works
 
-- [Pietron](https://github.com/dnek/pietron) - 難解プログラミング言語PietのIDE。Minesの仕様はPietの影響を受けています。
+- [Pietron](https://github.com/dnek/pietron) - Cross-platform IDE for Piet (Piet is an esoteric language). The specification of Mines is affected by Piet.
 
-- [UnambiSweeper](https://dnek.app/unambi) - 最後まで論理的に解けるマインスイーパーアプリ。AndroidとiOSに対応しています。
+- [UnambiSweeper](https://dnek.app/unambi) - logically solvable Minesweeper app. It supports Android and iOS.
 
-## ライセンス
+## License
 
-このプロジェクトにはMITライセンスが供与されています。
-詳細は[LICENSE](LICENSE) ファイルを参照してください。
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
