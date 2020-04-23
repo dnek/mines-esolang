@@ -2,10 +2,13 @@ import argparse
 from collections import deque
 import re
 from sys import stdin
-from time import perf_counter
+from time import perf_counter_ns
 from typing import List, Tuple, Union
 
 def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int, bool]]]:
+  debug_mode = args.debug
+  if debug_mode:
+    parse_start_time = perf_counter_ns()
   raw_code = open(filename, encoding='utf-8').read().split(sep='\n')
   comment_re = re.compile(r'#.*')
   line_re = re.compile(r'\s+', flags=re.ASCII)
@@ -69,6 +72,19 @@ def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int
       oeprations_append(parse_operation(line))
   if len(operations) == 0:
     raise NameError('No operation.')
+
+  if debug_mode:
+    parse_end_time = perf_counter_ns()
+    print('**field values**')
+    print('   ', end='')
+    for i in range(len(field[0])):
+      print(str(i).rjust(3), end='')
+    print()
+    for i, l in enumerate(field):
+      print(str(i).rjust(3), l)
+    print()
+    print(f'parse: {(parse_end_time - parse_start_time) / 1000000}ms')
+    print()
   return field, mines, operations
 
 def run(field: List[List[int]],
@@ -81,7 +97,23 @@ def run(field: List[List[int]],
     show_stack: bool = args.stack
     show_command: bool = args.command
     operation_count = 0
-    operation_limit: int = args.limit if args.limit else -1
+    operation_limit: int = args.limit if args.limit else 0
+    if operation_limit > 0:
+      try: # Windows
+        from msvcrt import getch
+      except ImportError: # Other OS
+        def getch():
+          import sys
+          import tty
+          import termios
+          fd = sys.stdin.fileno()
+          old = termios.tcgetattr(fd)
+          try:
+            tty.setraw(fd)
+            return sys.stdin.read(1)
+          finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
     command_names = [
       '0p: push(count)', #0
       '1p: push(1)',
@@ -119,6 +151,8 @@ def run(field: List[List[int]],
       'e: command error'
     ]
 
+    run_time = 0
+
   height = len(field)
   width = len(field[0])
   operations_length = len(operations)
@@ -131,12 +165,21 @@ def run(field: List[List[int]],
   ever_rest_cells = height * width - mines
   ever_rest_mines = mines
   flagged = [[False] * width for _ in range_height]
-  stack = []
-  operation_pointer = -1
   flag_mode = False
-  recent_input = ''
+
+  operation_pointer = -1
   opration_to_perform = None
 
+  input_from_stdin = args.input == None
+  if not input_from_stdin:
+    recent_input = open(args.input, encoding='utf-8').read()
+  elif args.echo != None:
+    input_from_stdin = False
+    recent_input = args.echo
+  else:
+    recent_input = ''
+
+  stack = []
   stack_append = stack.append
   stack_pop = stack.pop
   stack_insert = stack.insert
@@ -244,14 +287,16 @@ def run(field: List[List[int]],
                   stack[insert_index:insert_index] = roll_items
                 return 22
           elif current_number == 3: #command-3r (input as integer)
-            recent_input += stdin.read()
+            if input_from_stdin:
+              recent_input += stdin.read()
             read_match = re.fullmatch(int_re, recent_input)
             if read_match != None:
               stack_append(int(read_match[1]))
               recent_input = read_match[2]
               return 23
           elif current_number == 4: #command-4r (input as char)
-            recent_input += stdin.read()
+            if input_from_stdin:
+              recent_input += stdin.read()
             if len(recent_input) > 0:
               c, recent_input = recent_input[0], recent_input[1:]
               stack_append(ord(c))
@@ -346,13 +391,8 @@ def run(field: List[List[int]],
 
   while ever_rest_cells > 0 and ever_rest_mines > 0:
     if debug_mode:
-      if operation_limit == 0:
-        print('Operation limit exceeded.')
-        break
-      elif operation_limit > 0:
-        operation_limit -= 1
       operation_count += 1
-      print(f'operaion[{operation_count}]')
+      run_start_time = perf_counter_ns()
     if opration_to_perform != None:
       op_x, op_y, op_right = opration_to_perform
       opration_to_perform = None
@@ -385,6 +425,7 @@ def run(field: List[List[int]],
     command_number = perform_operation(op_x, op_y, op_right)
 
     if debug_mode:
+      run_time += perf_counter_ns() - run_start_time
       if show_command:
         print('**command**')
         print(f'exec "{command_names[command_number]}" at ({op_y}, {op_x}) by {"right" if op_right else "left"} in {"flag" if flag_mode else "normal"} mode')
@@ -401,40 +442,37 @@ def run(field: List[List[int]],
             print('F' if flagged[i][j] else ('#' if not current_revealed[i][j] else (number if number > 0 else '.')), end=' ')
           print()
         print()
+      if operation_limit > 0 and operation_count % operation_limit == 0:
+        print('**whole output start**')
+        print(output_debug)
+        print('**whole output end**')
+        print(f'operaion count: {operation_count}')
+        print(f'Continue to press [Enter] or exit to press any other key.')
+        if getch() != '\r':
+          break
 
   if debug_mode:
+    print()
     print('**whole output start**')
     print(output_debug)
     print('**whole output end**')
+    print(f'operaion count: {operation_count}')
     print()
+    print(f'run: {run_time / 1000000}ms')
 
 def main():
   filename = args.program_path
-  debug_mode = args.debug
-  if debug_mode:
-    parse_start_time = perf_counter()
-  parsed_data = parse_code(filename)
-  if debug_mode:
-    parse_end_time = perf_counter()
-    print('   ', end='')
-    for i in range(len(parsed_data[0][0])):
-      print(str(i).rjust(3), end='')
-    print()
-    for i, l in enumerate(parsed_data[0]):
-      print(str(i).rjust(3), l)
-    run_start_time = perf_counter()
-  run(*parsed_data)
-  if debug_mode:
-    end_time = perf_counter()
-    print(f'parse: {parse_end_time - parse_start_time}s, run: {end_time - run_start_time}s')
+  run(*parse_code(filename))
 
 if __name__ == "__main__":
   arg_parser = argparse.ArgumentParser()
-  arg_parser.add_argument('-d', '--debug', help="Debug mode", action="store_true")
-  arg_parser.add_argument('-f', '--field', help="Show field each phase (require debug mode)", action="store_true")
-  arg_parser.add_argument('-s', '--stack', help="Show stack each phase (require debug mode)", action="store_true")
-  arg_parser.add_argument('-c', '--command', help="Show command each phase (require debug mode)", action="store_true")
-  arg_parser.add_argument('-l', '--limit', help="Limit operation count (require debug mode)", type=int)
   arg_parser.add_argument('program_path', help='Program path', type=str)
+  arg_parser.add_argument('-i', '--input', help='Input file path', type=str)
+  arg_parser.add_argument('-e', '--echo', help='String to echo to input', type=str)
+  arg_parser.add_argument('-d', '--debug', help="Debug mode", action="store_true")
+  arg_parser.add_argument('-c', '--command', help="Show command each phase (require debug mode)", action="store_true")
+  arg_parser.add_argument('-s', '--stack', help="Show stack each phase (require debug mode)", action="store_true")
+  arg_parser.add_argument('-f', '--field', help="Show field each phase (require debug mode)", action="store_true")
+  arg_parser.add_argument('-l', '--limit', help="Limit operation count to perform at once (require debug mode)", type=int)
   args = arg_parser.parse_args()
   main()
