@@ -3,9 +3,10 @@ from collections import deque
 import re
 from sys import stdin
 from time import perf_counter_ns
-from typing import List, Tuple, Union
+from typing import Any, List, Tuple, Union
+from mines.__version__ import __version__
 
-def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int, bool]]]:
+def parse_code(filename: str, args: Any) -> Tuple[List[List[int]], int, List[Tuple[int, int, bool]]]:
   debug_mode = args.debug
   if debug_mode:
     parse_start_time = perf_counter_ns()
@@ -89,7 +90,8 @@ def parse_code(filename: str) -> Tuple[List[List[int]], int, List[Tuple[int, int
 
 def run(field: List[List[int]],
     mines: int,
-    operations: List[Union[Tuple[int, int, bool], bool]]):
+    operations: List[Union[Tuple[int, int, bool], bool]],
+    args: Any):
   debug_mode: bool = args.debug
   if debug_mode:
     output_debug = ''
@@ -461,10 +463,6 @@ def run(field: List[List[int]],
     print(f'run: {run_time / 1000000}ms')
 
 def main():
-  filename = args.program_path
-  run(*parse_code(filename))
-
-if __name__ == "__main__":
   arg_parser = argparse.ArgumentParser()
   arg_parser.add_argument('program_path', help='Program path', type=str)
   arg_parser.add_argument('-i', '--input', help='Input file path', type=str)
@@ -474,5 +472,11 @@ if __name__ == "__main__":
   arg_parser.add_argument('-s', '--stack', help="Show stack each phase (require debug mode)", action="store_true")
   arg_parser.add_argument('-f', '--field', help="Show field each phase (require debug mode)", action="store_true")
   arg_parser.add_argument('-l', '--limit', help="Limit operation count to perform at once (require debug mode)", type=int)
+  arg_parser.add_argument('-V', '--version', action='version', version=__version__)
   args = arg_parser.parse_args()
+
+  filename = args.program_path
+  run(*parse_code(filename, args), args)
+
+if __name__ == "__main__":
   main()
