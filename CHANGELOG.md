@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.4
+
+- Add workflow to upload package to PyPI.
+
 ## 1.0.3
 
 - Add English README and this CHANGELOG.
