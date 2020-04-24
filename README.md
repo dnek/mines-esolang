@@ -1,4 +1,4 @@
-# Mines
+# Mines [![PyPI](https://img.shields.io/pypi/v/mines-esolang)](https://pypi.org/project/mines-esolang/)
 
 An esoteric language inspired by Minesweeper.
 
