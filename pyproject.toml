@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mines-esolang"
+dynamic = ["version"]
+description = "An esoteric language inspired by Minesweeper."
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["mines", "interpreter", "esolang", "esoteric", "minesweeper"]
+authors = [{ name = "DNEK", email = "dnek.app@gmail.com" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Games/Entertainment :: Puzzle Games",
+    "Topic :: Software Development :: Interpreters",
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/dnek/mines-esolang"
+
+[project.scripts]
+mines = "mines_esolang.mines:main"
+
+[tool.hatch.version]
+path = "src/mines_esolang/__version__.py"

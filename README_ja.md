@@ -2,7 +2,7 @@
 
 マインスイーパーから着想を得た難解プログラミング言語。
 
-- English is here（[README.md](README.md)）。
+- English is here（[README.md](README.md)）.
 
 ## 概要
 
@@ -191,60 +191,62 @@ p0, p1をポップした状態でスタックが `1, 2, 3, 4` の場合、深さ
 
 ## インストール
 
-```
-pip3 install mines-esolang
+[uv](https://docs.astral.sh/uv/) でインストールする（推奨）。
+
+```sh
+uv tool install mines-esolang
 ```
 
 バージョンが表示されるか確認する。
 
-```
-mines -V
+```sh
+mines --version
 ```
 
 ## インタプリタの実行方法
 
 通常はこのようにする。
 
-```
-$ mines examples/hello.mines
+```sh
+mines examples/hello.mines
 ```
 
 直接ソースファイルから実行することもできる。
 
-```
-$ python3 mines/mines.py examples/hello.mines
+```sh
+uv run src/mines_esolang/mines.py examples/hello.mines
 ```
 
 `d` でデバッグモードを有効にする。
 各マスの数字表やコードのパース及び実行にかかった時間が出力される。
 
-```
-$ mines examples/hello.mines -d
+```sh
+mines examples/hello.mines -d
 ```
 
 デバッグモードが有効なとき、`c`, `s`, `f`でそれぞれ各操作実行後のコマンド、スタック、盤面を出力する。
 また、`l`で指定した操作回数でステップ実行することができる。
 
-```
-$ mines examples/hello.mines -dcsfl 42
+```sh
+mines examples/hello.mines -dcsfl 42
 ```
 
 ファイルから入力を取る場合は `i` でファイルパスを指定する。
 
-```
-$ mines examples/cat.mines -i README.md
+```sh
+mines examples/cat.mines -i README.md
 ```
 
 直接入力を指定する場合は `e` を使う。
 
-```
-$ mines examples/add.mines -e "1 2"
+```sh
+mines examples/add.mines -e "1 2"
 ```
 
 適宜 `echo` や `cat` を利用しても良い。
 
-```
-$ echo -n "meow" | mines examples/cat.mines
+```sh
+echo -n "meow" | mines examples/cat.mines
 ```
 
 ## 作者
@@ -255,7 +257,7 @@ $ echo -n "meow" | mines examples/cat.mines
 
 - [Pietron](https://github.com/dnek/pietron) - 難解プログラミング言語PietのIDE。Minesの仕様はPietの影響を受けています。
 
-- [UnambiSweeper](https://dnek.app/unambi) - 最後まで論理的に解けるマインスイーパーアプリ。AndroidとiOSに対応しています。
+- [UnambiSweeper](https://dnek.net/ja/unambi) - 最後まで論理的に解けるマインスイーパーアプリ。AndroidとiOSに対応しています。
 
 ## ライセンス
 

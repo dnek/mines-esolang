@@ -187,64 +187,66 @@ If the depth is negative, e.g. one rotation, the stack is manipulated from the b
 
 ## Examples of implementation
 
-See [examples/](examples) 。
+See [examples/](examples).
 
 ## Install
 
-```
-pip3 install mines-esolang
+Install with [uv](https://docs.astral.sh/uv/) (recommended).
+
+```sh
+uv tool install mines-esolang
 ```
 
 Make sure it displays the version.
 
-```
-mines -V
+```sh
+mines --version
 ```
 
 ## How to run the interpreter
 
 Usually do like this.
 
-```
-$ mines examples/hello.mines
+```sh
+mines examples/hello.mines
 ```
 
 You can also run it directly from the source file.
 
-```
-$ python3 mines/mines.py examples/hello.mines
+```sh
+uv run src/mines_esolang/mines.py examples/hello.mines
 ```
 
 Activate the debug mode with `d`.
 This outputs a table of numbers in each cell, the time taken to parse the code, and the time taken to run it.
 
-```
-$ mines examples/hello.mines -d
+```sh
+mines examples/hello.mines -d
 ```
 
 When the debug mode is active, the command, the stack and the field are output by `c`, `s` and `f` respectively after each operation.
 Also, you can perform step executions at the number of operations specified by `l`.
 
-```
-$ mines examples/hello.mines -dcsfl 42
+```sh
+mines examples/hello.mines -dcsfl 42
 ```
 
 To get input from a file, specify the file path with `i`.
 
-```
-$ mines examples/cat.mines -i README.md
+```sh
+mines examples/cat.mines -i README.md
 ```
 
 To specify a direct input, use `e`.
 
-```
-$ mines examples/add.mines -e "1 2"
+```sh
+mines examples/add.mines -e "1 2"
 ```
 
 You can use `echo` or `cat` if you want.
 
-```
-$ echo -n "meow" | mines examples/cat.mines
+```sh
+echo -n "meow" | mines examples/cat.mines
 ```
 
 ## Author
@@ -255,7 +257,7 @@ $ echo -n "meow" | mines examples/cat.mines
 
 - [Pietron](https://github.com/dnek/pietron) - Cross-platform IDE for Piet (Piet is an esoteric language). The specification of Mines is affected by Piet.
 
-- [UnambiSweeper](https://dnek.app/unambi) - logically solvable Minesweeper app. It supports Android and iOS.
+- [UnambiSweeper](https://dnek.net/en/unambi) - logically solvable Minesweeper app. It supports Android and iOS.
 
 ## License
 

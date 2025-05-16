@@ -1,5 +1,7 @@
 # Change Log
 
+See [Releases](https://github.com/dnek/mines-esolang/releases) for recent changes.
+
 ## 1.0.4
 
 - Add workflow to upload package to PyPI.
