@@ -257,7 +257,7 @@ echo -n "meow" | mines examples/cat.mines
 
 - [Pietron](https://github.com/dnek/pietron) - Cross-platform IDE for Piet (Piet is an esoteric language). The specification of Mines is affected by Piet.
 
-- [UnambiSweeper](https://dnek.app/unambi) - logically solvable Minesweeper app. It supports Android and iOS.
+- [UnambiSweeper](https://dnek.net/en/unambi) - logically solvable Minesweeper app. It supports Android and iOS.
 
 ## License
 

@@ -257,7 +257,7 @@ echo -n "meow" | mines examples/cat.mines
 
 - [Pietron](https://github.com/dnek/pietron) - 難解プログラミング言語PietのIDE。Minesの仕様はPietの影響を受けています。
 
-- [UnambiSweeper](https://dnek.app/unambi) - 最後まで論理的に解けるマインスイーパーアプリ。AndroidとiOSに対応しています。
+- [UnambiSweeper](https://dnek.net/ja/unambi) - 最後まで論理的に解けるマインスイーパーアプリ。AndroidとiOSに対応しています。
 
 ## ライセンス
 
