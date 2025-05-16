@@ -205,16 +205,8 @@ mines --version
 
 ## How to run the interpreter
 
-Usually do like this.
-
 ```sh
 mines examples/hello.mines
-```
-
-You can also run it directly from the source file.
-
-```sh
-uv run src/mines_esolang/mines.py examples/hello.mines
 ```
 
 Activate the debug mode with `d`.

@@ -477,6 +477,3 @@ def main():
 
   filename = args.program_path
   run(*parse_code(filename, args), args)
-
-if __name__ == "__main__":
-  main()

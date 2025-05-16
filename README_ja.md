@@ -205,16 +205,8 @@ mines --version
 
 ## インタプリタの実行方法
 
-通常はこのようにする。
-
 ```sh
 mines examples/hello.mines
-```
-
-直接ソースファイルから実行することもできる。
-
-```sh
-uv run src/mines_esolang/mines.py examples/hello.mines
 ```
 
 `d` でデバッグモードを有効にする。
