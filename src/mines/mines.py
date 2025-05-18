@@ -4,7 +4,7 @@ import re
 from sys import stdin
 from time import perf_counter_ns
 from typing import Any, List, Tuple, Union
-from mines_esolang.__version__ import __version__
+from mines.__version__ import __version__
 
 def parse_code(filename: str, args: Any) -> Tuple[List[List[int]], int, List[Tuple[int, int, bool]]]:
   debug_mode = args.debug

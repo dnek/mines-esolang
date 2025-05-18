@@ -26,7 +26,10 @@ dependencies = []
 Homepage = "https://github.com/dnek/mines-esolang"
 
 [project.scripts]
-mines = "mines_esolang.mines:main"
+mines = "mines.mines:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mines"]
 
 [tool.hatch.version]
-path = "src/mines_esolang/__version__.py"
+path = "src/mines/__version__.py"
