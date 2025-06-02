@@ -88,4 +88,4 @@
 7,1   #add
 11;3  #out(c)
 14,-1 #push2
--1,-2 #push2, exit
+-1,-2 #push2; game clear
