@@ -1,16 +1,18 @@
-***.*..
-*..**..
-****...
-3,0 #push4
-2,1 #push6
-6,2 #push6
-1,1 #push7
-3,0 #sub
-3;0 #in(c)
-5,0 #dup
-2;1 #out(c)
-5,2 #positive
-1;1 #skip
-4,2 #push3, exit
-4;2 #flag, swap
-5;2 #reset(r)
+# Echo inputs until EOF.
+
+****..
+*.*.*.
+***.*.
+5,0 #push1
+5,2 #push2
+3,2 #push4
+3,1 #push6
+1,1 #push8
+3,2 #sub
+3;2 #in(c)
+5,2 #dup
+3;1 #out(c)
+3,2 #sub
+5;0 #not
+1;1 #perform(r); `4;isEOF`
+5;0 #chord; isEOF ? game clear : reset(r)
