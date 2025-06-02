@@ -33,3 +33,15 @@ packages = ["src/mines"]
 
 [tool.hatch.version]
 path = "src/mines/__version__.py"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D1",   # undocumented-*
+    "D203", # incorrect-blank-line-before-class (incompatible with D211)
+    "D213", # multi-line-summary-second-line (incompatible with D212)
+]
+unfixable = [
+    "F401", # unused-import
+    "F841", # unused-variable
+]
