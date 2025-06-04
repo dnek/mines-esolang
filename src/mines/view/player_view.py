@@ -17,12 +17,12 @@ class PlayerView:
             case "flagged":
                 return Ansi("Ｆ", fg=0, bg=7)  # noqa: RUF001
             case "opened":
-                cell_number = player.get_cell_number(cell)
-                match cell_number:
+                cell_digit = player.get_cell_digit(cell)
+                match cell_digit:
                     case 0:
                         return Ansi("・", faint=True)
                     case _:
-                        return Ansi(chr(cell_number + 65296))
+                        return Ansi(chr(cell_digit + 65296))
 
     def get_board_info_str(self) -> str:
         player = self.__player

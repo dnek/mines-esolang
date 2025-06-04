@@ -4,8 +4,8 @@ from mines.player.board import (
     BoardSize,
     BoardValues,
     Cell,
-    CellNumber,
-    is_cell_number,
+    CellDigit,
+    is_cell_digit,
 )
 from mines.player.operation import (
     ClickOperation,
@@ -130,7 +130,7 @@ def parse(code: str) -> Program:
 
     board_size = BoardSize(width=board_width, height=board_height)
 
-    def count_cell_number(cell: Cell) -> CellNumber:
+    def count_cell_digit(cell: Cell) -> CellDigit:
         cell = Cell(row_index=cell.row_index, column_index=cell.column_index)
         if formatted_lines[header_count + cell.row_index][cell.column_index] == "*":
             return 9
@@ -140,13 +140,13 @@ def parse(code: str) -> Program:
             == "*"
             for next_cell in board_size.iterate_adjacent_cells(cell)
         )
-        if is_cell_number(mine_count):
+        if is_cell_digit(mine_count):
             return mine_count
 
-        message = f"mine count: {mine_count} is not a cell number."
+        message = f"mine count: {mine_count} is not a cell digit."
         raise ParserInternalError(message)
 
-    cell_numbers = BoardValues[CellNumber](board_size, count_cell_number)
+    cell_digits = BoardValues[CellDigit](board_size, count_cell_digit)
 
     operation_list = [
         __parse_operation(formatted_lines[index], board_size)
@@ -156,4 +156,4 @@ def parse(code: str) -> Program:
     if len(operation_list) == 0:
         raise NoOperationsSyntaxError
 
-    return Program(board_size, cell_numbers, operation_list)
+    return Program(board_size, cell_digits, operation_list)

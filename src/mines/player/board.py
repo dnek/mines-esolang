@@ -82,10 +82,10 @@ class BoardValues[T]:
 
 CellState = Literal["unopened", "flagged", "opened"]
 
-CellNumber = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+CellDigit = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-CELL_NUMBER_MINE = 9
+CELL_DIGIT_MINE = 9
 
 
-def is_cell_number(value: int) -> TypeIs[CellNumber]:
-    return 0 <= value <= CELL_NUMBER_MINE
+def is_cell_digit(value: int) -> TypeIs[CellDigit]:
+    return 0 <= value <= CELL_DIGIT_MINE

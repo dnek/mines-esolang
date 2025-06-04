@@ -29,7 +29,7 @@ def __get_click_result(runtime_state: RuntimeState) -> ClickResult:
 def __run_push_n(runtime_state: RuntimeState) -> None:
     click_result = __get_click_result(runtime_state)
     runtime_state.stack.push(
-        runtime_state.player.get_cell_number(click_result.clicked_cell),
+        runtime_state.player.get_cell_digit(click_result.clicked_cell),
     )
 
 
@@ -48,7 +48,7 @@ def __run_push_count(runtime_state: RuntimeState) -> None:
 def __run_push_sum(runtime_state: RuntimeState) -> None:
     click_result = __get_click_result(runtime_state)
     opened_cells = __get_opened_cells(click_result)
-    sum_value = sum(runtime_state.player.get_cell_number(cell) for cell in opened_cells)
+    sum_value = sum(runtime_state.player.get_cell_digit(cell) for cell in opened_cells)
     runtime_state.stack.push(sum_value)
 
 

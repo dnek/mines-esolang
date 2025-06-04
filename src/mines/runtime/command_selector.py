@@ -1,4 +1,4 @@
-from mines.player.board import CellNumber
+from mines.player.board import CellDigit
 from mines.player.operation import (
     ClickOperation,
     ClickResult,
@@ -45,14 +45,14 @@ class CommandSelectorInternalError(Exception):
 
 def __select_click_on_opened_command(
     click_result: ClickResult,
-    clicked_number: CellNumber,
+    clicked_digit: CellDigit,
 ) -> Command:
     if click_result.open_result is not None:
         if click_result.open_result == "over":
             return RESET_R_COMMAND
         return PUSH_SUM_COMMAND
 
-    mapping: dict[CellNumber, Command] = (
+    mapping: dict[CellDigit, Command] = (
         {
             0: POP_COMMAND,
             1: POSITIVE_COMMAND,
@@ -77,9 +77,9 @@ def __select_click_on_opened_command(
             8: PERFORM_R_COMMAND,
         }
     )
-    command = mapping.get(clicked_number)
+    command = mapping.get(clicked_digit)
     if command is None:
-        message = f"clicked number: {clicked_number} is invalid."
+        message = f"clicked digit: {clicked_digit} is invalid."
         raise CommandSelectorInternalError(message)
     return command
 
@@ -93,12 +93,12 @@ def __select_click_command(
         message = "Click result is none."
         raise CommandSelectorInternalError(message)
 
-    clicked_number = player.get_cell_number(click_operation.cell)
+    clicked_digit = player.get_cell_digit(click_operation.cell)
 
     match click_result.previous_cell_state:
         case "unopened":
             if click_result.is_left_click:
-                match clicked_number:
+                match clicked_digit:
                     case 0:
                         return PUSH_COUNT_COMMAND
                     case 9:
@@ -109,7 +109,7 @@ def __select_click_command(
         case "flagged":
             return NOOP_COMMAND if click_result.is_left_click else SWAP_COMMAND
         case "opened":
-            return __select_click_on_opened_command(click_result, clicked_number)
+            return __select_click_on_opened_command(click_result, clicked_digit)
 
 
 def select_command(operation: Operation, player: Player) -> Command:

@@ -2,11 +2,11 @@ from collections import deque
 from collections.abc import Iterable
 
 from mines.player.board import (
-    CELL_NUMBER_MINE,
+    CELL_DIGIT_MINE,
     BoardSize,
     BoardValues,
     Cell,
-    CellNumber,
+    CellDigit,
 )
 from mines.player.operation import (
     ClickOperation,
@@ -22,7 +22,7 @@ from mines.player.player_state import PlayerState
 
 class Player:
     __board_size: BoardSize
-    __cell_numbers: BoardValues[CellNumber]
+    __cell_digits: BoardValues[CellDigit]
     __mine_number: int
 
     __player_state: PlayerState
@@ -33,11 +33,11 @@ class Player:
     def __init__(
         self,
         board_size: BoardSize,
-        cell_numbers: BoardValues[CellNumber],
+        cell_digits: BoardValues[CellDigit],
     ) -> None:
         self.__board_size = board_size
-        self.__cell_numbers = cell_numbers
-        self.__mine_number = list(cell_numbers.iterate_values()).count(9)
+        self.__cell_digits = cell_digits
+        self.__mine_number = list(cell_digits.iterate_values()).count(9)
 
         self.__player_state = PlayerState(
             game_status="playing",
@@ -62,7 +62,7 @@ class Player:
             self.__rest_safe_count -= 1
             opened_cells.append(cell)
 
-            if self.__cell_numbers.get(cell) == 0:
+            if self.__cell_digits.get(cell) == 0:
                 for next_cell in self.__board_size.iterate_adjacent_cells(cell):
                     queue.append(next_cell)
 
@@ -72,7 +72,7 @@ class Player:
         return opened_cells
 
     def __open_cells_or_over(self, cells: Iterable[Cell]) -> OpenResult:
-        if any(self.__cell_numbers.get(cell) == CELL_NUMBER_MINE for cell in cells):
+        if any(self.__cell_digits.get(cell) == CELL_DIGIT_MINE for cell in cells):
             self.__player_state.game_status = "over"
             return "over"
 
@@ -90,7 +90,7 @@ class Player:
                 case "opened":
                     pass
 
-        if len(flagged_cells) == self.__cell_numbers.get(cell):
+        if len(flagged_cells) == self.__cell_digits.get(cell):
             return unopened_cells
 
         return []
@@ -154,8 +154,8 @@ class Player:
     def get_board_size(self) -> BoardSize:
         return self.__board_size
 
-    def get_cell_number(self, cell: Cell) -> CellNumber:
-        return self.__cell_numbers.get(cell)
+    def get_cell_digit(self, cell: Cell) -> CellDigit:
+        return self.__cell_digits.get(cell)
 
     def get_mine_number(self) -> int:
         return self.__mine_number
