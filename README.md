@@ -1,256 +1,482 @@
 # Mines [![PyPI](https://img.shields.io/pypi/v/mines-esolang)](https://pypi.org/project/mines-esolang/)
 
-An esoteric language inspired by Minesweeper.
+A Minesweeper-driven [esolang](https://en.wikipedia.org/wiki/Esoteric_programming_language).
 
-- 日本語はこちら（[README_ja.md](README_ja.md)）。
+- 日本語版はこちら [README_ja.md](README_ja.md)
 
 ## Overview
 
-Mines is a programming language in which programs are executed by operations that mimic the gameplay of Minesweeper.
+Mines is a programming language that executes commands in response to operations to play minesweeper.
 
-## Program description
+## Language specifications
 
-A Mines program consists of a field and an operation list in this order with a line break.
+### Design philosophy
 
-**Field** is represented by a rectangular grid consisting of `.` and `*`.
-Where `.` is a safe cell, and `*` is a mine cell.
+Mines is designed mainly to meet the following criteria.
 
-**Operation list** consists of one or more operations separated by `\n`.
+- Minesweeper-like
+- Easy to implement straightforwardly
+- Interesting as an esolang
 
-**An operation** is represented by two integers separated by `,` or `;`, or `!`, or a blank line.
-Blank lines immediately after the field and at the end of the file are also counted as operations.
+Note that Mines is designed under the influence of [Piet](https://www.dangermouse.net/esoteric/piet.html), and esolang here is often assumed to be Piet.
 
-**Two integers** indicate the column and row numbers from the top left of the field, and the delimiter indicates the mouse button to click.
-Where `,` is a left click and `;` is a right click.
+In cases where there are multiple competing criteria in designing specifications, the selection is made to satisfy those listed earlier as much as possible.
 
-**Column and row numbers** may be negative or point outside the range of the field.
-These are converted into non-negative remainders divided by the width or height of the field, respectively.
+### Integer division
 
-**`!`** indicates the flagging mode switch (see below).
+All integer divisions used in Mines are [**floored division**](https://en.wikipedia.org/wiki/Modulo#Variants_of_the_definition).
 
-Half-width whitespaces and characters in `\t\r\f\v` appearing in the program are ignored.
-Also, strings from # to the end of the line are ignored.
-This means that the program can contain **comments**.
+In **floored division**, the **quotient** is the largest integer that is not greater than the rational result of dividing the dividend by the divisor.
+As a result, if the dividend cannot be divided by the divisor, the **remainder** is the one whose sign is the same as the divisor and whose absolute value is less than the divisor.
 
-The following is an example of a program with a 4x3 field and 5 operations, and the meaning of each operation.
+Let `//` and `%` be the operators that represent the **quotient** and **remainder** of floored division, respectively.
+
+#### Integer division example
+
+- `5 // 3 = 1` , `5 % 3 = 2`
+- `-4 // 3 = -2` , `-4 % 3 = 2`
+- `5 // (-3) = -2` , `5 % (-3) = -1`
+- `-4 // (-3) = 1` , `-4 % (-3) = -1`
+
+### Program specifications
+
+Mines **program** has a **board** and a **operation list**.
+
+#### Board
+
+**Board** is a rectangular grid with **number of columns** and **number of rows** both positive.
+**Number of columns** of board corresponds to **width**, **number of rows** corresponds to **height**.
+
+A **column index** of a board is an integer starting from `0` and less than the number of columns of the board.
+A **row index** of a board is an integer starting from `0` and less than the number of rows of the board.
+
+Board has **coordinates** corresponding to all the different pairs of **column indices** and **row indices**, one for each.
+The **coordinate** of board corresponding to column index `i` and row index `j` is denoted as `(i, j)`.
+
+An **unwrapped column index** of board is an integer, which represents the column index whose value is the remainder given by dividing it by the number of columns of the board.
+An **unwrapped row index** of board is an integer, which represents the row index whose value is the remainder given by dividing it by the number of row of the board.
+
+Board has **board cells** corresponding to all its coordinates, one for each.
+Let `i` denote the **column index** and `j` the **row index** of a board cell corresponding to the coordinate `(i, j)`.
+
+A **board cell** is either a **safe cell** or a **mine cell**.
+
+When the absolute difference of the row indices and column indices of two distinct board cells is less than or equal to `1` each, those board cells are **adjacent** to each other.
+
+A board cell has a **digit**.
+The **digit** of a safe cell is the number of mine cells adjacent to it.
+The **digit** of a mine cell is `9`.
+
+#### Operation list
+
+**Operation list** is a [singly circular linked list](https://en.wikipedia.org/wiki/Linked_list#Circular_linked_list) with one or more **operations** as elements.
+
+An **operation** is either a **click operation** or a **switch operation** or a **restart operation** or a **no operation**.
+
+A **click operation** has a **coordinate** and a **mouse button**.
+
+The **coordinate** of a click operation is a coordinate of board.
+The board cell corresponding to the coordinate of a click operation is called the **operation target cell**.
+
+A mouse button is either **left button** or **right button**.
+
+### Syntax rules
+
+Mines source code is a single Unicode string.
+
+Hereinafter, a newline refers to `\n`.
+
+Half-width spaces, `\t`, `\v`, `\f`, and `\r` characters that appear in source code are ignored.
+
+For each line of source code, if there is any `#`, each character from there to the end of the line (not including newline) is ignored.
+
+Source code consists of zero or more **header lines** and one **program**, separated by newlines in this order.
+
+A **header line** is represented by an empty string.
+
+**Program** is represented by the **board** and **operation list** separated by a newline in this order.
+
+**Board** is represented by all **rows** separated by newlines in the row index order.
+
+The **row** of row index `i` of board is represented by joining all the **board cells** of row index `i` in the column index order.
+
+A **safe cell** is represented by `.`.
+
+A **mine cell** is represented by `*`.
+
+**Operation list** is represented by all **operations** separated by newlines in order.
+
+A **click operation** is represented by connecting the **unwrapped column index** representing `i`, the **mouse button**, and the **unwrapped row index** representing `j` in this order, with `(i, j)` as its coordinate.
+
+**Unwrapped column index** and **unwrapped row index** are each expressed in decimal notation so that they match the regular expression `/^[+-]?[0-9]+$/`.
+
+**Left button** is represented by `,`.
+
+**Right button** is represented by `;`.
+
+A **switch operation** is represented by `!`.
+
+A **restart operation** is represented by `@`.
+
+A **no operation** is represented by an empty string.
+
+Below is an example of source code consisting of 2 header lines and a program with a board of 4 columns and 3 rows and 6 operations, and the contents of each operation.
 
 ```
-.*.* #This is a comment.
+# You can write header comments.
+
+.*.* # Board is rectangular.
 ...*
 .**.
 0,0
--1, -1 #Spaces are ignored.
+-1, -1 # Spaces are ignored.
 
 10;-10
 !
+@
 ```
 
-| Operation | Meaning |
-----|----
-| `0,0` | Left click on the top left cell. |
-| `-1,-1` | Right click on the bottom right cell (equal to `3,2` ). |
-|  | do nothing. |
-| `9;-10` | Right-click on the (9 % 4)th cell from the left and the (-10 % 3)th cell from the top (equal to `1;2` ). |
-| `!` | Switch the flagging mode. |
+| Operation | Content                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------ |
+| `0,0`     | Click operation with coordinate `(0, 0)` (top left) and left button                              |
+| `-1,-1`   | Click operation with coordinate `(-1 % 4, -1 % 3)`, i.e. `(3, 2)` (bottom right) and left button |
+|           | No operation                                                                                     |
+| `9;-10`   | Click operation with coordinate `(9 % 4, -10 % 3)`, i.e. `(1, 2)` and right button               |
+| `!`       | Switch operation                                                                                 |
+| `@`       | Restart operation                                                                                |
 
-## Program processing
+### Program execution rules
 
-The Mines interpreter has a **operation pointer** (OP), which by default points to the top of the operation list.
-The interpreter performs an operation pointed by OP on the field and then advances the OP by one.
-After the bottom operation is performed, the OP returns to the top operation and continues operations.
+#### Runtime state
 
-For each operation, **an command** is selected and executed according to the result and the state of the cell in which the operation was performed.
+The interpreter has the following states during program execution.
 
-If **game over** is occurred by an operation, the program does not terminate and the field returns to its initial state (no revealed cells and no flags) and the game resumes (the OP is not initialized).
+- A **player**
+- An **operation pointer**
+- An **operation queue**
+- A **stack**
+- An **input buffer**
 
-The interpreter has **a stack** of signed integers for storage, which is manipulated by the commands.
-The initial state of the stack is empty, and it can have an infinite number of values as long as the processing system allows.
+The **player** has the following states.
 
-In addition, the interpreter manages **the flagging mode**, which is initially off.
-It is toggled between on and off by an operation of the flagging mode switch.
-Game over does not initialize the flag mode.
+- A **game status**
+- **cell states** corresponding to each of the board cells
+- A **flag mode**
 
-After each command is executed, if "each safe cell" or "each mine cell" is opened one or more times throughout the entire gameplay, the program **terminates** (this behavior is different from game clear on a regular minesweeper).
+The **game status** takes the value of either **playing** or **cleared** or **over**.
+The initial value of game status is **playing**.
 
-## Performance of operations
+A **cell state** takes the value of either **unopened** or **flagged** or **opened**.
+The initial value of a cell state is **unopened**.
 
-**Left click** behaves just like it does in most minesweeper apps.
+When a cell state `A` corresponds to a board cell `B`, `A` is called the **state** of `B`.
 
-Left click on an unopened cell will open it.
-If you open a mine, it's game over.
+When a state of board cell with the digit `0` changes from **unopened** to **opened**, each of its adjacent board cells with the status **unopened** immediately becomes **opened**.
 
-Left click on a revealed cell has no effect on the field, but some command may be executed.
+When all safe cells are each **opened**, the game status immediately becomes **cleared**.
 
-**Right click** also behaves like it does in many minesweeper apps.
+The **flag mode** takes the value of either **on** or **off**.
+The initial value of flag mode is **off**.
 
-Right click on an unopened cell will put up a flag or remove it.
+The **operation pointer** points to a single operation in the operation list.
+The operation pointer initially points to the first operation in the operation list.
 
-Right click on a revealed cell will open all adjacent unopened cells if the number on the cell is equal to the number of flags standing around it.
-If trying to open some mines, it's game over.
-This operation is called "Chord" and in some apps, Chord is bound to a long press or other mouse button.
+Operation pointer **advances** means that the operation pointed to by the operation pointer moves to the linked destination in the circular linked list.
 
-If a cell opened by either click is empty, the surrounding cells are also opened recursively (the flags standing in the cell being opened are removed and opened).
+When the operation pointer is **requested** for an operation, it returns the operation it is pointing to and then advances once.
 
-**Flagging mode switch** is a feature that most mobile minesweeper apps have, and it behaves just as well.
-When the flagging mode is on, the left-click and right-click are treated swapped.
-For example, left click on an unopened cell will put up a flag or remove it, and the command corresponding to it will be executed.
+The **operation queue** is a queue that contains zero or more operations.
+The operation queue is initially empty.
 
-Nothing happens with an operation of **blank line** (the OP proceeds as usual).
+The **stack** is a stack that contains zero or more integers.
+The stack is initially empty.
 
-## Commands
+To **reverse** the stack is the process defined below.
 
-The cell number "0" represents a blank cell and the number "9" represents a mine cell.
+- Pop values from the stack until the stack is empty, then push them in the order they were popped.
 
-"Push", "pop", etc. all refer to operations on the stack.
+To **roll** the stack with depth `d` and number of rolls `r` is the process defined below.
 
-The first popped value in a command is "p0" and the next popped value is "p1".
+- If `|d| < 2` or `r = 0`, do nothing.
+- If `d > 1` and `r = 1`, pop `d` times from the stack, push the first popped value, and push the remaining popped values in the reverse order of the pop order.
+- If `d > 1` and `r != 1`, repeat rolling the stack `r % d` times with depth `d` and number of rolls `1`.
+- If `d < -1`, reverse the stack, roll the stack with depth `-d` and number of rolls `r`, and reverse the stack again.
 
-### Command errors
+The **input buffer** is a Unicode string.
+The initial value of input buffer is an empty string.
 
-When a command cannot be executed correctly because there are not enough values for pops in the stack or 0 division is attempted or so on, this is called **a command error**.
-If a command error is likely to occur during the execution, it is treated as if there was no command and the OP proceeds to the next.
-Note that game over is not a command error.
+When a reference after the tail of the input buffer is attempted, it receives input from the standard input as appropriate, adds it to the tail, and then continues to be referenced.
+However, once the standard input indicates `EOF`, it receives no input.
 
-The conditions for the occurrence of a command error except for insufficient number of pops are shown in the following tables.
+When the input buffer is requested for an **integer**, it removes from the beginning the string matching the regular expression `/^\s*[+-]?[0-9]+$/`, parses it into an integer, and returns it.
 
-### Flagging mode switch
+When the input buffer is requested for a **Unicode code point**, it removes from the beginning the string equivalent to one unit in Unicode code points, converts it to a Unicode code point, and returns it.
 
-| Command name | Pop count | Description | error condition |
-----|----|----|----
-| reverse | 0 | Reverse order of the elements in the entire stack. | - |
+#### Operation instructions
 
-### Left click on an unopened cell
+Each time the player is instructed to do an **operation**, it performs it as follows.
 
-#### Flag is standing on the cell
+When the flag mode is **off**, a **click operation** is performed as a **left click operation** if the mouse button is the left button, and as a **right click operation** if the mouse button is the right button.
+When the flag mode is **on**, the opposite is true.
 
-| Command name | Pop count | Cell number | Description | error condition |
-----|----|----|----|----
-| noop | 0 | Any (because not revealed) | Do nothing | - |
+For a **left click operation**, if the state of the operation target cell is **unopened**, then perform the following.
 
-#### Flag is not standing on the cell
+- If the digit of the operation target cell is `9`, set the game status to **over**.
+- Otherwise, set its cell state to **opened**.
 
-| Command name | Pop count | Cell number | Description | error condition |
-----|----|----|----|----
-| push(count) | 0 | 0 | Push the number of cells opened by this click (≧1) | - |
-| push(n) | 0 | 1〜8 | Push the number written in the cell | - |
-| reset(l) | 0 | 9 | Reset the field to its initial state and resume the game (stack and OP are not reset, this cell is regarded as opened) | - |
+For a **right click operation**, perform the following depending on the state of the operation target cell.
 
-### Right click on an unopened cell
+- If **unopened**, set it to **flagged**.
+- If **flagged**, set it to **unopened**.
+- If **opened**, let `F` be the set of board cells adjacent to the operation target cell and whose states are **flagged** and `U` be the set of those that are **unopened**, and perform the following.
 
-| Command name | Pop count | Cell number | Description | error condition |
-----|----|----|----|----
-| swap | 2 | Any (because not revealed) | Push p0, then push p1 | - |
+    - If the number of elements in `F` matches the digit of the operation target cell and the number of elements in `U` is positive, then perform **Chord**.
+    - **Chord** does the following.
+        - If `U` contains any board cells with the digit `9`, set the game status to **over**.
+        - Otherwise, set each state of `U` to **opened**.
 
-### Left click on an revealed cell
+For a **switch operation**, if the flag mode is **on**, set it to **off**; if it is **off**, set it to **on**.
 
-| Command name | Pop count | Cell number | Description | error condition |
-----|----|----|----|----
-| pop | 1 | 0 | Pop | - |
-| positive | 1 | 1 | Push 1 if p0 is positive, else push 0 | - |
-| dup | 1 | 2 | Push p0 twice | - |
-| add | 2 | 3 | Push (p1 + p0) | - |
-| sub | 2 | 4 | Push (p1 - p0) | - |
-| mul | 2 | 5 | Push (p1 * p0) | - |
-| div | 2 | 6 | Push (p1 / p0) | 0 division |
-| mod | 2 | 7 | Push (p1 % p0) | 0 division |
-| perform(l) | 2 | 8 | Perform an operation of "`p1,p0`" | - |
+For a **restart operation**,set all cell states to **unopened** and the game status to **playing**.
 
-### Right click on an revealed cell
+For a **no operation**, do nothing.
 
-#### Try to open one or more new cells (Chord)
+#### Commands
 
-| Command name | Pop count | Result | Description | error condition |
-----|----|----|----|----
-| push(sum) | 0 | Success | Push the sum of the numbers written in the cells opened by this click | - |
-| reset(r) | Length of stack | Game over | Reset the field and the stack to their initial states and resume the game (OP is not reset, the cells are not regarded as opened) | - |
+Each time the player performs an operation, the interpreter selects one type of **command**.
 
-#### Otherwise
-| Command name | Pop count | Cell number | Description | error condition |
-----|----|----|----|----
-| push(0) | 0 | 0 | Push 0 | - |
-| not | 1 | 1 | Push 1 if p0 is 0, else push 0 | - |
-| roll | 2 | 2 | Roll the values up to stack depth p1 p0 times (see "Roll Details" for details) | The absolute value of p1 exceeds the length of the stack |
-| in(n) | 0 | 3 | Take one integer-parsed value from the beginning of the standard input and push it | Can not parse |
-| in(c) | 0 | 4 | Take a single character from the standard input and push its Unicode value | Empty input |
-| out(n) | 1 | 5 | Output p0 to the standard output | - |
-| out(c) | 1 | 6 | Output a single character whose Unicode value is p0 to the standard output | Invalid Unicode value |
-| skip | 1 | 7 | Add p0 to the OP (loop if overflow occurs) | - |
-| perform(r) | 2 | 8 | Perform an operation of "`p1;p0`" | - |
+If a command pops a fixed number of times from the stack at the beginning of its execution flow, the series of pops is called the **constant times pop**.
 
-##### Roll details
+If a situation arises during command execution that prevents the execution flow from proceeding correctly, a **command error** occurs.
 
-If the stack is `1, 2, 3, 4` with p0 and p1 popped, a single rotation of a value up to a depth of 3 embeds the top value underneath and the stack becomes `1, 4, 2, 3`.
+##### Command list
 
-If the number of rotations is negative, for example, if the number of rotations is -1, the opposite manipulatation will be performed and it becomes `1, 3, 4, 2`.
+There are 25 commands in total.
 
-If the depth is negative, e.g. one rotation, the stack is manipulated from the bottom and becomes `2, 3, 1, 4`.
+The following table summarizes the names and execution flows of each command.
 
-## Examples of implementation
+Here, apply the following to each explanation.
+- Assume that the command was selected when the player executed operation `A`.
+- Let `B` be the set of board cells whose states changed from **unopened** to **opened** during the execution of `A`.
+- If the command pops `n` times from the stack by the constant times pop, describe `n` in the **Number of pops** column. Also, let the element taken out by the `i`th pop be `p(i)`. Here, `i` is an integer starting from `0` and ending with `n - 1`.
 
-See [examples/](examples).
+| Name          | Number of pops | Execution flow (excluding constant times pop)                                                  |
+| ------------- | -------------- | ---------------------------------------------------------------------------------------------- |
+| `push(n)`     | -              | Push the digit of the operation target cell of `A` onto the stack.                             |
+| `push(count)` | -              | Push the number of elements in `B` onto the stack.                                             |
+| `push(sum)`   | -              | Push the sum of each digit of `B` onto the stack.                                              |
+| `pop`         | `1`            | Do nothing.                                                                                    |
+| `positive`    | `1`            | Push `1` onto the stack if `p(0) > 0`, otherwise push `0` onto the stack.                      |
+| `dup`         | `1`            | Push `p(0)` onto the stack twice.                                                              |
+| `add`         | `2`            | Push `p(1) + p(0)` onto the stack.                                                             |
+| `sub`         | `2`            | Push `p(1) - p(0)` onto the stack.                                                             |
+| `mul`         | `2`            | Push `p(1) * p(0)` onto the stack.                                                             |
+| `div`         | `2`            | Push `p(1) // p(0)` onto the stack.                                                            |
+| `mod`         | `2`            | Push `p(1) % p(0)` onto the stack.                                                             |
+| `not`         | `1`            | Push `1` onto the stack if `p(0) = 0`, otherwise push `0` onto the stack.                      |
+| `roll`        | `2`            | Roll the stack with depth `p(1)` and number of rolls `p(0)`.                                   |
+| `in(n)`       | -              | Request an integer from the input buffer and push it onto the stack.                           |
+| `in(c)`       | -              | Request a Unicode code point from the input buffer and push it onto the stack.                 |
+| `out(n)`      | `1`            | Output `p(0)` to standard output in decimal notation.                                          |
+| `out(c)`      | `1`            | Output the character whose Unicode code point is `p(0)` to standard output.                    |
+| `skip`        | `1`            | Advance the operation pointer `p(0) % l` times, where `l` is the length of the operation list. |
+| `perform(l)`  | `2`            | Enqueue the operation obtained by parsing `p(1),p(0)` into the operation queue.                |
+| `perform(r)`  | `2`            | Enqueue the operation obtained by parsing `p(1);p(0)` into the operation queue.                |
+| `reset(l)`    | -              | Enqueue a restart operation into the operation queue.                                          |
+| `reset(r)`    | -              | Pop from the stack until it is empty, and enqueue a restart operation to the operation queue.  |
+| `swap`        | `2`            | Push `p(0)` and `p(1)` onto the stack in this order.                                           |
+| `reverse`     | -              | Reverse the stack.                                                                             |
+| `noop`        | -              | Do nothing.                                                                                    |
 
-## Install
+##### Command error list
 
-Install with [uv](https://docs.astral.sh/uv/) (recommended).
+There are 4 command errors in total.
+
+The following table summarizes the names of each command error, their occurrence conditions, and the commands that can cause them.
+
+| Name                  | Occurrence condition                                               | Commands                                                       |
+| --------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------- |
+| `StackUnderflowError` | Attempt to pop from the empty stack.                               | All commands that do a constant times pop or roll on the stack |
+| `ZeroDivisionError`   | Attempt division with `0` as the divisor.                          | `div`, `mod`                                                   |
+| `InputMismatchError`  | The input buffer cannot return the requested value.                | `in(n)`, `in(c)`                                               |
+| `UnicodeRangeError`   | Attempt to obtain a character outside the Unicode code point range | `out(c)`                                                       |
+
+##### Command selection flow
+
+The command is selected in the following selection flow by performing operation `A`.
+Here, let the state of the operation target cell of `A` immediately before the execution of `A` be `B`, and the digit be `C`.
+
+- `A` is a left click operation
+    - `B` was **unopened**
+        - `C = 0` -> `push(count)`
+        - `0 < C < 9` -> `push(n)`
+        - `C = 9` -> `reset(l)`
+    - `B` was **flagged** -> `noop`
+    - `B` was **opened**
+        - `C = 0` -> `pop`
+        - `C = 1` -> `positive`
+        - `C = 2` -> `dup`
+        - `C = 3` -> `add`
+        - `C = 4` -> `sub`
+        - `C = 5` -> `mul`
+        - `C = 6` -> `div`
+        - `C = 7` -> `mod`
+        - `C = 8` -> `perform(l)`
+- `A` is a right click operation -> `swap`
+    - `B` was **unopened** -> `swap`
+    - `B` was **flagged** -> `swap`
+    - `B` was **opened**
+        - Chord was performed
+            - Game status has become **over** -> `reset(r)`
+            - Otherwise -> `push(sum)`
+        - Chord was not performed
+            - `C = 0` -> `push(n)`
+            - `C = 1` -> `not`
+            - `C = 2` -> `roll`
+            - `C = 3` -> `in(n)`
+            - `C = 4` -> `in(c)`
+            - `C = 5` -> `out(n)`
+            - `C = 6` -> `out(c)`
+            - `C = 7` -> `skip`
+            - `C = 8` -> `perform(r)`
+- `A` is a switch operation -> `reverse`
+- `A` is a restart operation -> `noop`
+- `A` is a no operation -> `noop`
+
+#### Program execution flow
+
+The interpreter executes the program by following the steps below from 1.
+
+1. If the game status is **cleared**, terminate program execution.
+2. If the operation queue is empty, request an operation from the operation pointer and enqueue it.
+3. Dequeue from the operation queue and instruct the player to perform the taken operation.
+4. Select a command based on the operation performed by the player.
+5. Verify whether a command error occurs when the selected command is executed.
+6. If the verification result shows that no command error occurs, execute the command.
+7. Return to step 1.
+
+## Processor implementation
+
+If a runtime error occurs before the processor starts executing the program flow, the process should be terminated abnormally.
+In particular, if the source code does not comply with the syntax rules, a syntax error should occur before the program is executed, and the process should be terminated abnormally.
+
+Once the program execution flow has started, the process should not be terminated due to behavior that violates the language specification, except in unavoidable cases such as external interrupts.
+
+For example, the size of the stack and the range of values that integers can take are ideally infinite, but it is difficult for the processor to reproduce them perfectly.
+When the processor actually loses its ability to reproduce them (typically when errors such as stack overflow or arithmetic overflow occur), it is desirable to transition to a process such as performing no operation infinitely.
+
+Note that the following behaviors do not violate the language specifications.
+
+- Obtaining verification results indicating that a command error will occur
+- Game status becomes **over**
+
+## Source code example
+
+- [examples/](examples)
+
+## Execution environment
+
+### Install
+
+- [uv](https://docs.astral.sh/uv/) (recommended)
 
 ```sh
 uv tool install mines-esolang
 ```
 
-Make sure it displays the version.
+- [pipx](https://pipx.pypa.io/stable/)
 
 ```sh
-mines --version
+pipx install mines-esolang
 ```
 
-## How to run the interpreter
+- From the source
+
+```sh
+git clone https://github.com/dnek/mines-esolang
+cd mines-esolang
+uv tool install -e .
+```
+
+### Uninstall
+
+```sh
+uv tool uninstall mines-esolang
+```
+
+```sh
+pipx uninstall mines-esolang
+```
+
+### Usage
+
+Check the version with `-V`.
+
+```sh
+mines -V
+```
+
+Show help with `-h`.
+
+```sh
+mines -h
+```
+
+Execute a program by specifying the file path of the source code.
 
 ```sh
 mines examples/hello.mines
 ```
 
-Activate the debug mode with `d`.
-This outputs a table of numbers in each cell, the time taken to parse the code, and the time taken to run it.
+To replace standard input with file input, specify the file path with `-i`.
 
 ```sh
-mines examples/hello.mines -d
+mines examples/cat.mines -i examples/cat.mines
 ```
 
-When the debug mode is active, the command, the stack and the field are output by `c`, `s` and `f` respectively after each operation.
-Also, you can perform step executions at the number of operations specified by `l`.
-
-```sh
-mines examples/hello.mines -dcsfl 42
-```
-
-To get input from a file, specify the file path with `i`.
-
-```sh
-mines examples/cat.mines -i README.md
-```
-
-To specify a direct input, use `e`.
+To replace standard input directly with a string, specify the string with `-e`.
 
 ```sh
 mines examples/add.mines -e "1 2"
 ```
 
-You can use `echo` or `cat` if you want.
+You can use redirection or pipes as appropriate.
 
 ```sh
-echo -n "meow" | mines examples/cat.mines
+echo -n "🐱meow" | mines examples/cat.mines
 ```
+
+If you do not use `-i`, `-e`, redirection, or pipes, interactive input will be accepted as appropriate.
+
+Enable debug mode with `-d`.
+You can step through the execution while checking the state at runtime.
+
+```sh
+mines examples/hello.mines -d
+```
+
+However, debug mode cannot be executed if standard input is not connected to the terminal due to redirection or piping.
 
 ## Author
 
-- **[DNEK](https://github.com/dnek)**
+- [**DNEK**](https://github.com/dnek)
 
-### Related works
+## Related projects
 
-- [Pietron](https://github.com/dnek/pietron) - Cross-platform IDE for Piet (Piet is an esoteric language). The specification of Mines is affected by Piet.
+- [Mines Web Interpreter](https://mug.sh/mines-editor/) by [sh-mug](https://github.com/sh-mug)
 
-- [UnambiSweeper](https://dnek.net/en/unambi) - logically solvable Minesweeper app. It supports Android and iOS.
+    A web application that serves as a code editor and interpreter for Mines.
+
+- [Pietron](https://github.com/dnek/pietron) by DNEK
+
+    An IDE for the esolang Piet.
+
+- [UnambiSweeper](https://dnek.net/en/unambi) by DNEK
+
+    A Minesweeper app that can be solved logically to the end.
+    Available for Android and iOS.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
+See the [LICENSE](LICENSE) file for details.
