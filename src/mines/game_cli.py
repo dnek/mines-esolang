@@ -88,8 +88,8 @@ def main() -> None:
         path = Path(args.source)
         with path.open(encoding="utf-8") as f:
             code = f.read()
-        program = parse(code)
-        game = Game(path.name, program.board_size, program.cell_digits)
+        cell_digits = parse(code).cell_digits
+        game = Game(path.name, cell_digits.get_board_size(), cell_digits)
     else:
         if args.level:
             if args.level in LEVEL_NAMES:

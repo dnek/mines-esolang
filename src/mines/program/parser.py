@@ -156,4 +156,4 @@ def parse(code: str) -> Program:
     if len(operation_list) == 0:
         raise NoOperationsSyntaxError
 
-    return Program(board_size, cell_digits, operation_list)
+    return Program(cell_digits, operation_list)

@@ -32,16 +32,15 @@ class Player:
 
     def __init__(
         self,
-        board_size: BoardSize,
         cell_digits: BoardValues[CellDigit],
     ) -> None:
-        self.__board_size = board_size
+        self.__board_size = cell_digits.get_board_size()
         self.__cell_digits = cell_digits
         self.__mine_number = list(cell_digits.iterate_values()).count(9)
 
         self.__player_state = PlayerState(
             game_status="playing",
-            cell_states=BoardValues(board_size, lambda _: "unopened"),
+            cell_states=BoardValues(self.__board_size, lambda _: "unopened"),
             flag_mode=False,
         )
         self.__rest_mine_count = self.__mine_number

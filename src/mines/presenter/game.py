@@ -51,9 +51,9 @@ class Game:
         self.__mine_pattern = mine_pattern
         if isinstance(mine_pattern, int):
             cell_digits = self.__get_random_cell_digits(None)
-            self.__player = Player(board_size, cell_digits)
+            self.__player = Player(cell_digits)
         else:
-            self.__player = Player(board_size, mine_pattern)
+            self.__player = Player(mine_pattern)
         self.__selected_cell = Cell(0, 0)
 
     def __draw(self) -> None:

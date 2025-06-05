@@ -35,7 +35,7 @@ class Runner:
         step_listener: StepListener | None,
     ) -> None:
         self.__runtime_state = RuntimeState(
-            Player(program.board_size, program.cell_digits),
+            Player(program.cell_digits),
             OperationPointer(program.operation_list),
             deque(),
             Stack(),
