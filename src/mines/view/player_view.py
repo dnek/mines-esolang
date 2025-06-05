@@ -42,11 +42,14 @@ class PlayerView:
             ],
         )
 
-    def get_board_str(self) -> str:
+    def get_board_str(self, selected_cell: Cell | None = None) -> str:
         board_ansi = BoardValues[Ansi](
             self.__player.get_board_size(),
             self.__get_cell_ansi,
         )
+
+        if selected_cell:
+            board_ansi.get(selected_cell).bg = 4
 
         click_result = self.__player.get_last_click_result()
         if click_result:

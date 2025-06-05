@@ -175,3 +175,25 @@ class Player:
 
     def get_last_click_result(self) -> ClickResult | None:
         return self.__last_click_result
+
+    def replace_cell_digits_safely(
+        self,
+        cell_digits: BoardValues[CellDigit],
+    ) -> bool:
+        if self.__player_state.game_status != "playing":
+            return False
+
+        if cell_digits.get_board_size() != self.__board_size:
+            return False
+
+        if list(cell_digits.iterate_values()).count(9) != self.__mine_number:
+            return False
+
+        for cell in self.__board_size.iterate_board_cells():
+            if self.__player_state.cell_states.get(cell) != "opened":
+                continue
+            if cell_digits.get(cell) != self.__cell_digits.get(cell):
+                return False
+
+        self.__cell_digits = cell_digits
+        return True

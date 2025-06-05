@@ -45,15 +45,21 @@ class BoardSize(NamedTuple):
 
 
 class BoardValues[T]:
+    __board_size: BoardSize
+    __values: list[list[T]]
+
     def __init__(self, board_size: BoardSize, item_fn: Callable[[Cell], T]) -> None:
-        self.__board_size: BoardSize = board_size
-        self.__values: list[list[T]] = [
+        self.__board_size = board_size
+        self.__values = [
             [
                 item_fn(Cell(column_index=column_index, row_index=row_index))
                 for column_index in range(board_size.width)
             ]
             for row_index in range(board_size.height)
         ]
+
+    def get_board_size(self) -> BoardSize:
+        return self.__board_size
 
     def get(self, cell: Cell) -> T:
         return self.__values[cell.row_index][cell.column_index]

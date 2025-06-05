@@ -27,6 +27,7 @@ Homepage = "https://github.com/dnek/mines-esolang"
 
 [project.scripts]
 mines = "mines.cli:main"
+mines-game = "mines.game_cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mines"]
