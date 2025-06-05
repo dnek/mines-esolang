@@ -8,10 +8,10 @@ from mines.runtime.input_buffer import InputSource
 from mines.runtime.runner import Runner, StepResult
 from mines.view.ansi import Ansi, em
 from mines.view.cli_frame_drawer import CliFrameDrawer
-from mines.view.getch import get_key
 from mines.view.input_view import InputView
 from mines.view.output_view import OutputView
 from mines.view.player_view import PlayerView
+from mines.view.prompt import Prompt
 from mines.view.step_result_view import StepResultView
 
 
@@ -84,39 +84,29 @@ class Debugger:
 
         cli_frame_drawer.draw_frame()
 
-    def __show_prompt(self) -> None:
-        prompt_str = "  ".join(
-            [
-                "[space]/[n]ext",
-                "[s]tep N",
-                f"[r]erun step {self.__last_step_count}",
-                "[c]ontinue",
-                "[q]uit\n",
-            ],
-        )
-        stderr.write(str(Ansi(prompt_str, fg=6)))
+    def __prompt_step_count(self) -> None:
+        message = str(Ansi("enter the step count >>> ", fg=5, bold=True))
+        stderr.write(message)
         stderr.flush()
+        self.__last_step_count = int(stdin.readline())
+        self.__rest_skip_count = self.__last_step_count
 
-        while True:
-            key = get_key()
-            match key:
-                case "n" | " ":
-                    pass
-                case "s":
-                    message = str(Ansi("enter the step count >>> ", fg=5, bold=True))
-                    stderr.write(message)
-                    stderr.flush()
-                    self.__last_step_count = int(stdin.readline())
-                    self.__rest_skip_count = self.__last_step_count
-                case "r":
-                    self.__rest_skip_count = self.__last_step_count
-                case "c":
-                    self.__rest_skip_count = -1
-                case "q":
-                    sys.exit(0)
-                case _:
-                    continue
-            break
+    def __rerun_step(self) -> None:
+        self.__rest_skip_count = self.__last_step_count
+
+    def __continue(self) -> None:
+        self.__rest_skip_count = -1
+
+    def __show_prompt(self) -> None:
+        prompt = Prompt()
+
+        prompt.add((" ", "n"), lambda: None, "[space]/[n]ext")
+        prompt.add("s", self.__prompt_step_count, "[s]tep N")
+        prompt.add("r", self.__rerun_step, f"[r]erun step {self.__last_step_count}")
+        prompt.add("c", self.__continue, "[c]ontinue")
+        prompt.add("q", lambda: sys.exit(0), "[q]uit\n")
+
+        prompt.show()
 
     def __step(self, step_result: StepResult) -> None:
         self.__operation_count += 1
