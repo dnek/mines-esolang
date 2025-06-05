@@ -13,9 +13,13 @@ authors = [{ name = "DNEK", email = "dnek.app@gmail.com" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Natural Language :: Japanese",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.13",
     "Topic :: Games/Entertainment :: Puzzle Games",
     "Topic :: Software Development :: Interpreters",
 ]
