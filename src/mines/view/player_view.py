@@ -1,4 +1,4 @@
-from mines.player.board import BoardValues, Cell, CellState
+from mines.player.board import CELL_DIGIT_MINE, BoardValues, Cell, CellState
 from mines.player.player import Player
 from mines.view.ansi import ANSI_LF, Ansi, em
 
@@ -11,13 +11,16 @@ class PlayerView:
 
     def __get_cell_ansi(self, cell: Cell, cell_state: CellState | None = None) -> Ansi:
         player = self.__player
+        is_over = player.get_player_state().game_status == "over"
+        cell_digit = player.get_cell_digit(cell)
         match cell_state or player.get_player_state().cell_states.get(cell):
             case "unopened":
-                return Ansi("＿", fg=0, bg=7)  # noqa: RUF001
+                raw_str = "＊" if is_over and cell_digit == CELL_DIGIT_MINE else "＿"  # noqa: RUF001
+                return Ansi(raw_str, fg=0, bg=7)
             case "flagged":
-                return Ansi("Ｆ", fg=0, bg=7)  # noqa: RUF001
+                raw_str = "Ｘ" if is_over and cell_digit != CELL_DIGIT_MINE else "Ｆ"  # noqa: RUF001
+                return Ansi(raw_str, fg=0, bg=7)
             case "opened":
-                cell_digit = player.get_cell_digit(cell)
                 match cell_digit:
                     case 0:
                         return Ansi("・", faint=True)
