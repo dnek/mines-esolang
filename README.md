@@ -6,7 +6,7 @@ A Minesweeper-driven [esolang](https://en.wikipedia.org/wiki/Esoteric_programmin
 
 ## Overview
 
-Mines is a programming language that executes commands in response to operations to play minesweeper.
+Mines is a programming language that executes commands in response to operations to play Minesweeper.
 
 ## Language specifications
 
@@ -456,6 +456,31 @@ mines examples/hello.mines -d
 ```
 
 However, debug mode cannot be executed if standard input is not connected to the terminal due to redirection or piping.
+
+### Bonus
+
+Installing `mines-esolang` also adds the command `mines-game`, which allows you to play a normal Minesweeper game.
+
+Play by specifying the level with `-l`.
+Levels can be specified as `beginner`, `intermediate`, `expert`, or their initials.
+
+```sh
+mines-game -l b
+```
+
+Play by specifying the width, height, and number of mines on the board with `-c`.
+
+```sh
+mines-game -c 48 24 256
+```
+
+By specifying the file path of the source code, you can play the board of that program.
+
+```sh
+mines-game examples/hello.mines
+```
+
+Except when playing a board from program, mines are placed so that the digit of the first cell opened is `0`.
 
 ## Author
 
