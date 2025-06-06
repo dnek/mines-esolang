@@ -31,7 +31,7 @@ As a result, if the dividend cannot be divided by the divisor, the **remainder**
 
 Let `//` and `%` be the operators that represent the **quotient** and **remainder** of floored division, respectively.
 
-#### Integer division example
+#### Integer division examples
 
 - `5 // 3 = 1` , `5 % 3 = 2`
 - `-4 // 3 = -2` , `-4 % 3 = 2`
@@ -370,7 +370,7 @@ Note that the following behaviors do not violate the language specifications.
 - Obtaining verification results indicating that a command error will occur
 - Game status becomes **over**
 
-## Source code example
+## Source code examples
 
 - [examples/](examples)
 
