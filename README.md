@@ -1,5 +1,7 @@
 # Mines [![PyPI](https://img.shields.io/pypi/v/mines-esolang)](https://pypi.org/project/mines-esolang/)
 
+<img src="assets/mines_256.png" height="64px" alt="Mines logo">
+
 A Minesweeper-driven [esolang](https://en.wikipedia.org/wiki/Esoteric_programming_language).
 
 - 日本語版はこちら [README_ja.md](README_ja.md)

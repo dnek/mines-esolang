@@ -1,5 +1,7 @@
 # Mines [![PyPI](https://img.shields.io/pypi/v/mines-esolang)](https://pypi.org/project/mines-esolang/)
 
+<img src="assets/mines_256.png" height="64px" alt="Mines logo">
+
 マインスイーパー駆動[難解プログラミング言語](https://ja.wikipedia.org/wiki/%E9%9B%A3%E8%A7%A3%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%E8%A8%80%E8%AA%9E)。
 
 - English version is here: [README.md](README.md)
