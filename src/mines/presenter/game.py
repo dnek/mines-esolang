@@ -111,7 +111,7 @@ class Game:
             return
 
         player = self.__player
-        if is_z_key == player.get_player_state().flag_mode:
+        if is_z_key == player.get_player_state().flagging_mode:
             return
 
         if player.get_rest_safe_count() != player.get_initial_safe_count():
@@ -150,13 +150,13 @@ class Game:
 
         z_key_desc = "open"
         x_key_desc = "flag/unflag/chord"
-        if self.__player.get_player_state().flag_mode:
+        if self.__player.get_player_state().flagging_mode:
             z_key_desc, x_key_desc = x_key_desc, z_key_desc
 
         prompt.add("z", lambda: self.__click(is_z_key=True), f"[z] {z_key_desc}")
 
         prompt.add("x", lambda: self.__click(is_z_key=False), f"[x] {x_key_desc}")
-        prompt.add("f", self.__switch, "[f] switch flag mode")
+        prompt.add("f", self.__switch, "[f] switch flagging mode")
 
         prompt.add_desc("[wasd]/[↑←↓→] move")
         move_params: tuple[tuple[tuple[str, str], int, int], ...] = (

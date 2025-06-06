@@ -163,7 +163,7 @@ The **player** has the following states.
 
 - A **game status**
 - **cell states** corresponding to each of the board cells
-- A **flag mode**
+- A **flagging mode**
 
 The **game status** takes the value of either **playing** or **cleared** or **over**.
 The initial value of game status is **playing**.
@@ -177,8 +177,8 @@ When a state of board cell with the digit `0` changes from **unopened** to **ope
 
 When all safe cells are each **opened**, the game status immediately becomes **cleared**.
 
-The **flag mode** takes the value of either **on** or **off**.
-The initial value of flag mode is **off**.
+The **flagging mode** takes the value of either **on** or **off**.
+The initial value of flagging mode is **off**.
 
 The **operation pointer** points to a single operation in the operation list.
 The operation pointer initially points to the first operation in the operation list.
@@ -218,8 +218,8 @@ When the input buffer is requested for a **Unicode code point**, it removes from
 
 Each time the player is instructed to do an **operation**, it performs it as follows.
 
-When the flag mode is **off**, a **click operation** is performed as a **left click operation** if the mouse button is the left button, and as a **right click operation** if the mouse button is the right button.
-When the flag mode is **on**, the opposite is true.
+When the flagging mode is **off**, a **click operation** is performed as a **left click operation** if the mouse button is the left button, and as a **right click operation** if the mouse button is the right button.
+When the flagging mode is **on**, the opposite is true.
 
 For a **left click operation**, if the state of the operation target cell is **unopened**, then perform the following.
 
@@ -237,7 +237,7 @@ For a **right click operation**, perform the following depending on the state of
         - If `U` contains any board cells with the digit `9`, set the game status to **over**.
         - Otherwise, set each state of `U` to **opened**.
 
-For a **switch operation**, if the flag mode is **on**, set it to **off**; if it is **off**, set it to **on**.
+For a **switch operation**, if the flagging mode is **on**, set it to **off**; if it is **off**, set it to **on**.
 
 For a **restart operation**,set all cell states to **unopened** and the game status to **playing**.
 

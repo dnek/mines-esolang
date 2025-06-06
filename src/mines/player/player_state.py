@@ -10,4 +10,4 @@ GameStatus = Literal["playing", "cleared", "over"]
 class PlayerState:
     game_status: GameStatus
     cell_states: BoardValues[CellState]
-    flag_mode: bool
+    flagging_mode: bool

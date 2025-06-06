@@ -41,7 +41,7 @@ class Player:
         self.__player_state = PlayerState(
             game_status="playing",
             cell_states=BoardValues(self.__board_size, lambda _: "unopened"),
-            flag_mode=False,
+            flagging_mode=False,
         )
         self.__rest_mine_count = self.__mine_number
         self.__rest_safe_count = self.get_initial_safe_count()
@@ -100,7 +100,7 @@ class Player:
     ) -> None:
         cell = operation.cell
         cell_state = self.__player_state.cell_states.get(cell)
-        is_left_click = operation.is_left_button ^ self.__player_state.flag_mode
+        is_left_click = operation.is_left_button ^ self.__player_state.flagging_mode
         open_result: OpenResult | None = None
 
         match cell_state:
@@ -128,7 +128,7 @@ class Player:
         )
 
     def __perform_switch(self) -> None:
-        self.__player_state.flag_mode ^= True
+        self.__player_state.flagging_mode ^= True
 
     def __perform_restart(self) -> None:
         for cell in self.__board_size.iterate_board_cells():

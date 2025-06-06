@@ -34,14 +34,14 @@ class PlayerView:
         mine_number = player.get_mine_number()
         rest_safe_count = player.get_rest_safe_count()
         initial_safe_count = player.get_initial_safe_count()
-        flag_mode = player.get_player_state().flag_mode
+        flagging_mode = player.get_player_state().flagging_mode
 
         return " ".join(
             [
                 f"{board_size.width}x{board_size.height}",
                 f"mines: {rest_mine_count}/{mine_number}",
                 f"safes: {rest_safe_count}/{initial_safe_count}",
-                f"flag mode: {em('ON' if flag_mode else 'OFF')}",
+                f"flagging mode: {em('ON' if flagging_mode else 'OFF')}",
             ],
         )
 

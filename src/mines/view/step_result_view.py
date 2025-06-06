@@ -29,8 +29,8 @@ class StepResultView:
                 return "no operation"
             case SwitchOperation():
                 player_state = self.__player.get_player_state()
-                flag_mode_str = em("ON" if player_state.flag_mode else "OFF")
-                return f"switch flag mode to {flag_mode_str}"
+                flagging_mode_str = em("ON" if player_state.flagging_mode else "OFF")
+                return f"switch flagging mode to {flagging_mode_str}"
             case RestartOperation():
                 return "restart"
             case ClickOperation():
