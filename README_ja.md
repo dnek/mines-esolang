@@ -10,6 +10,10 @@
 
 Minesはマインスイーパーをプレイする操作に応じてコマンドを実行するプログラミング言語である。
 
+## デモ
+
+<img src="assets/mines_demo.webp" height="270px" alt="Mines demo">
+
 ## 言語仕様
 
 ### 設計思想

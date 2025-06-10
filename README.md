@@ -10,6 +10,10 @@ A Minesweeper-driven [esolang](https://en.wikipedia.org/wiki/Esoteric_programmin
 
 Mines is a programming language that executes commands in response to operations to play Minesweeper.
 
+## Demo
+
+<img src="assets/mines_demo.webp" height="270px" alt="Mines demo">
+
 ## Language specifications
 
 ### Design philosophy
