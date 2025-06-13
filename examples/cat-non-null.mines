@@ -1,0 +1,18 @@
+# Echo inputs until EOF or `\0`.
+
+***.*..
+*..**..
+****...
+3,0 #push4
+2,1 #push6
+6,2 #push6
+1,1 #push7
+3,0 #sub
+3;0 #in(c)
+5,0 #dup
+2;1 #out(c)
+5,2 #positive
+1;1 #skip the next line until EOF or `\0`
+4,2 #push3; game clear
+4;2 #flag; swap
+5;2 #reset(r)

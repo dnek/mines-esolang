@@ -13,9 +13,13 @@ authors = [{ name = "DNEK", email = "dnek.app@gmail.com" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Natural Language :: Japanese",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.13",
     "Topic :: Games/Entertainment :: Puzzle Games",
     "Topic :: Software Development :: Interpreters",
 ]
@@ -26,7 +30,23 @@ dependencies = []
 Homepage = "https://github.com/dnek/mines-esolang"
 
 [project.scripts]
-mines = "mines_esolang.mines:main"
+mines = "mines.cli:main"
+mines-game = "mines.game_cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mines"]
 
 [tool.hatch.version]
-path = "src/mines_esolang/__version__.py"
+path = "src/mines/__version__.py"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D1",   # undocumented-*
+    "D203", # incorrect-blank-line-before-class (incompatible with D211)
+    "D213", # multi-line-summary-second-line (incompatible with D212)
+]
+unfixable = [
+    "F401", # unused-import
+    "F841", # unused-variable
+]

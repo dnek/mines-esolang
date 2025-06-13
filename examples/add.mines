@@ -1,3 +1,5 @@
+# Read two integers and write the sum of them.
+
 *.*
 ...
 ***
@@ -8,4 +10,4 @@
 2;1 #in(n)
 0,1 #add
 1;1 #out(n)
-1,0 #push2, exit
+1,0 #push2; game clear
