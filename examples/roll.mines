@@ -1,0 +1,22 @@
+# Roll [1, 2, 3, 4, 5] with specified depth and number of rolls.
+
+..*.
+*.*.
+*.**
+1,1 #push5
+1,2 #push4
+1,0 #push3
+3,0 #push2
+0,0 #push1
+1;0 #in(n); read depth
+1;0 #in(n); read number of rolls
+3;0 #roll
+1;1 #out(n)
+1;1 #out(n)
+1;1 #out(n)
+1;1 #out(n)
+1;1 #out(n)
+3;2 #swap
+1,2 #sub
+1;1 #out(n); write -1 if depth was out of range
+3,1 #push4; game clear
