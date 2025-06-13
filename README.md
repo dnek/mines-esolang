@@ -1,6 +1,6 @@
 # Mines [![PyPI](https://img.shields.io/pypi/v/mines-esolang)](https://pypi.org/project/mines-esolang/)
 
-<img src="assets/mines_256.png" height="64px" alt="Mines logo">
+<img src="https://raw.githubusercontent.com/dnek/mines-esolang/main/assets/mines_256.png" height="64px" alt="Mines logo">
 
 A Minesweeper-driven [esolang](https://en.wikipedia.org/wiki/Esoteric_programming_language).
 
@@ -12,7 +12,7 @@ Mines is a programming language that executes commands in response to operations
 
 ## Demo
 
-<img src="assets/mines_demo.webp" height="270px" alt="Mines demo">
+<img src="https://raw.githubusercontent.com/dnek/mines-esolang/main/assets/mines_demo.webp" height="270px" alt="Mines demo">
 
 ## Language specifications
 
