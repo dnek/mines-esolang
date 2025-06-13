@@ -126,7 +126,9 @@ A **restart operation** is represented by `@`.
 
 A **no operation** is represented by an empty string.
 
-Below is an example of source code consisting of 2 header lines and a program with a board of 4 columns and 3 rows and 6 operations, and the contents of each operation.
+#### Source code sample
+
+Below is a sample of source code consisting of 2 header lines and a program with a board of 4 columns and 3 rows and 6 operations, and the contents of each operation.
 
 ```
 # You can write header comments.
@@ -163,6 +165,8 @@ The interpreter has the following states during program execution.
 - A **stack**
 - An **input buffer**
 
+##### Player
+
 The **player** has the following states.
 
 - A **game status**
@@ -184,6 +188,8 @@ When all safe cells are each **opened**, the game status immediately becomes **c
 The **flagging mode** takes the value of either **on** or **off**.
 The initial value of flagging mode is **off**.
 
+##### Operation pointer
+
 The **operation pointer** points to a single operation in the operation list.
 The operation pointer initially points to the first operation in the operation list.
 
@@ -191,8 +197,12 @@ Operation pointer **advances** means that the operation pointed to by the operat
 
 When the operation pointer is **requested** for an operation, it returns the operation it is pointing to and then advances once.
 
+##### Operation queue
+
 The **operation queue** is a queue that contains zero or more operations.
 The operation queue is initially empty.
+
+##### Stack
 
 The **stack** is a stack that contains zero or more integers.
 The stack is initially empty.
@@ -207,6 +217,8 @@ To **roll** the stack with depth `d` and number of rolls `r` is the process defi
 - If `d > 1` and `r = 1`, pop `d` times from the stack, push the first popped value, and push the remaining popped values in the reverse order of the pop order.
 - If `d > 1` and `r != 1`, repeat rolling the stack `r % d` times with depth `d` and number of rolls `1`.
 - If `d < -1`, reverse the stack, roll the stack with depth `-d` and number of rolls `r`, and reverse the stack again.
+
+##### Input buffer
 
 The **input buffer** is a Unicode string.
 The initial value of input buffer is an empty string.
@@ -376,7 +388,7 @@ Note that the following behaviors do not violate the language specifications.
 - Obtaining verification results indicating that a command error will occur
 - Game status becomes **over**
 
-## Source code examples
+## Examples
 
 - [examples/](examples)
 
